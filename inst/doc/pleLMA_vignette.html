@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Carolyn J. Anderson" />
+
+
+<title>Pseudo-likelihood Estimation of Log-mulitplicative association models: The pleLMA Package</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Pseudo-likelihood Estimation of Log-mulitplicative association models: The pleLMA Package</h1>
+<h4 class="author">Carolyn J. Anderson</h4>
+<h4 class="date">4/26/2021</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Log-Multiplicative Association (LMA) Models are special cases of log-linear models with two-way interactions and are extensions of the RC(M) association model for two variables to multivariate categorical data. The variables may be dichotomous or multi-category (ploytomous). In LMA models, a multiplicative structure is imposed on the (matrices) of interaction parameters; thereby, reducing the number of parameters and easing interpretation and descriptions of the relationships between variables. For example, 20 5-category variables results in a cross-classification with 9.536743e+13 cells, 190 interactions, and 760 (unique) parameters estimates for the interactions. An LMA model fit to such data would require many fewer parameters to represent the interaction. Maximum likelihood estimation (MLE) for small cross-classifications can be handled by the ‘gnm’ package (<span class="citation">Turner and Firth (2020)</span>), and other. The ‘logmult’ package (<span class="citation">Bouchet-Valat et al. (2020)</span>), which is a wrapper function for ‘gnm’, can be used to fit an RC(M) association (<span class="citation">Goodman (1981)</span>) model to two-way tables. Unfortunately, MLE becomes unfeasible for moderate to large numbers of variables and/or large numbers of categories. This package uses pseudo-likelihood estimation to remove the limitations of MLE due to the size of the data set. For LMA models, pseudo-likelihood estimation has been shown to be a viable alternative to MLE and yields parameter estimates nearly identical to MLE ones (<span class="citation">Paek (2016)</span>, <span class="citation">Paek and Anderson (2017)</span>). Furthermore, pseudo-likelihood estimators are consistent and multivariate normaly distributed (<span class="citation">Arnold and Straus (1991)</span>, <span class="citation">Geys, Molenberghs, and Ryan (1999)</span>).</p>
+<p>LMA models have been derived from a number of different starting points, including graphical models (<span class="citation">Anderson and Vermunt (2000)</span>), (multidimensional) item response theory models (<span class="citation">Anderson and Yu (2007)</span>, <span class="citation">Anderson, Li, and Vermunt (2007)</span>, <span class="citation">Anderson, Verkuilen, and Peyton (2010)</span>, <span class="citation">Chen et al. (2018)</span>, <span class="citation">Hessen (2012)</span>, <span class="citation">Holland (1990)</span>, <span class="citation">Marsman et al. (2018)</span>), underlying multivarite normality (<span class="citation">Goodman (1981)</span>, <span class="citation">Becker (1989)</span>, <span class="citation">Rom and Sarkar (1990)</span>, <span class="citation">Wang (1987)</span>, <span class="citation">Wang (1997)</span>), the Ising model of feramagnetism (<span class="citation">Kruis and Maris (2016)</span>), distance based models (<span class="citation">Rooij (2007)</span>, <span class="citation">Rooij (2009)</span>, <span class="citation">Rooij and Heiser (2005)</span>), and others. The LMA models fit by the pleLMA package include the log-linear model of independence (as a baseline model), models in the Rasch family of item response theory (IRT) models, 1 and 2 parameter logistic IRT models, flexible generalized partial credit models (GPCM), and the Nominal response model. The importance of recognizing different starting points that lead to LMA models for oberved data is that the same model can be interpreted as arising from different underlying processes. For this package we take a more item response theory approach; however, it is important to note that this is not the only use for these models. For more details see <span class="citation">Anderson, Kateri, and Moustaki (2021)</span> as well as reference therein.</p>
+<p>This document starts with a brief description of the models and assumptions often made about the underlying process. In the subsequent sections, the algorithm is described followed by a detailed illustration of how to use the package. Two data sets are included with the package and are used in the examples presented here. The “dass” data set consists of responses by a random sample of 1000 individuals to 42 four-category items designed to measure three different constructs. The “vocab” data set consists of responses to 10 dichotomous vocabulary items made by 1309 individuals. In the final section, other uses of the functions in the package are sketched and plans for future additions to the package are described. An appendix is also included that lists and describes all output from fitting models.</p>
+</div>
+<div id="log-multiplicative-assosciation-models" class="section level1">
+<h1>Log-multiplicative Assosciation Models</h1>
+<p>Both <span class="math inline">\(i\)</span> and <span class="math inline">\(k\)</span> will denote variables and <span class="math inline">\(j_i\)</span> and <span class="math inline">\(\ell_k\)</span> will denote categories of variables <span class="math inline">\(i\)</span> and <span class="math inline">\(k\)</span>, respectively; however, to keep the notation simpler the subscripts on categories will be suppressed. The index <span class="math inline">\(m=1,\ldots, M\)</span> is used to denote latent dimensions or traits. When describing the algorithm, <span class="math inline">\(n\)</span> will be used to index for subjects (individuals, cases, etc), where <span class="math inline">\(n=1,\ldots, N\)</span>. The index <span class="math inline">\(n\)</span> is suppressed in the presentation of the model. Let <span class="math inline">\(\mathbf{Y}\)</span> be an <span class="math inline">\((I\times 1)\)</span> vector of random categorical variables and <span class="math inline">\(\mathbf{y}= (y_1, \ldots, y_I)&#39;\)</span> be it’s realization where <span class="math inline">\(y_i=j\)</span>. The most general LMA for the probability that <span class="math inline">\(\mathbf{Y}=\mathbf{y}\)</span> is <span class="math display">\[\log (P(\mathbf{Y}=\mathbf{y})) = \lambda + \sum_{i=1} \lambda_{ij} + \sum_i \sum_{k&gt;i} \sum_m \sum_{m&#39;\ge m} \sigma_{mm&#39;}\nu_{ijm}\nu_{k\ell m&#39;}, \]</span> where <span class="math inline">\(\lambda\)</span> ensures that probabilities sum to 1, <span class="math inline">\(\lambda_{ij}\)</span> is the marginal effect parameter for category <span class="math inline">\(j\)</span> of variable <span class="math inline">\(i\)</span>, <span class="math inline">\(\sigma_{mm&#39;}\)</span> is the association parameter for dimensions <span class="math inline">\(m\)</span> and <span class="math inline">\(m&#39;\)</span>, and <span class="math inline">\(\nu_{ijm}\)</span> and <span class="math inline">\(\nu_{k\ell m&#39;}\)</span> are category scale values for items <span class="math inline">\(i\)</span> and <span class="math inline">\(k\)</span> on dimensions <span class="math inline">\(m\)</span> and <span class="math inline">\(m&#39;\)</span>, respectively. The association parameters measure the strength of the relationship between items and the category scale values represent the structure.</p>
+<p>LMA models as latent variable models can be derived as statistical graphical models where observed discrete variables (i.e., <span class="math inline">\(\mathbf{y}\)</span>) are related to unobserved (potentially correlated) continuous ones (i.e., <span class="math inline">\(\mathbf{\theta}= \{\theta_m\}\)</span>). The assumptions required to yield the general LMA model given above are that</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(\mathbf{Y}\)</span> follows a multinomial distribution,</li>
+<li>The categorical variables are independent conditional on the latent variables,</li>
+<li>The latent variables follow a homogeneous conditional multivariate normal distribution; that is, <span class="math inline">\(\mathbf{\Theta}|\mathbf{y} \sim MVN(\mathbf{\mu_y}, \mathbf{\Sigma}).\)</span></li>
+</ol>
+<p>There are no latent variables in the LMA models, but the parameters for the distribution of the latent variables equal to or are functions of the parameters of the LMA models. The elements of the conditional covariance matrix <span class="math inline">\(\mathbf{\Sigma}\)</span> are the <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters in the LMA model. The conditional means equal <span class="math display">\[E(\theta_m|{\mathbf{y}}) = \sum_m  \sigma_{mm} \left(\sum_i \nu_{ijm}\right) + \sum_{m&#39;}\sigma_{mm&#39;} \left(\sum_i \nu_{ijm&#39;}\right).\]</span></p>
+<p>The LMA above is very general and represents the model where each categorical variable is directly related to each of the latent variables and all latent variables are correlated. This model can be fit with sufficient identification constraints, but the current version of the pleLMA package only fits models where each categorical variable is directedly related to one and only one latent variable. This is not a limitation of pseudo-likelihood estimation, but of the current package. The identification constraints used in the package are that <span class="math inline">\(\sum_j\lambda_{ij}= 0\)</span> and <span class="math inline">\(\sum_j \nu_{ijm}= 0\)</span>. Scaling identification constraints are also required, but these differ depending on the specific LMA model that is fit to data. The scaling identification constraints will given for each case of the model.</p>
+<div id="relationship-with-item-response-theory" class="section level2">
+<h2>Relationship with Item Response Theory</h2>
+<p>Different IRT models can be fit by the placing restrictions the <span class="math inline">\(\nu_{ijm}\)</span> parameters. For models in the Rasch (‘rasch’) family, the restrictions are that <span class="math display">\[\nu_{ijm} = x_j,\]</span> where the <span class="math inline">\(x_j\)</span>s are typically equally spaced integers (e.g., 0, 1, 2, 3) and are the same for all items. The generalized partial credit model (‘gpcm’) places fewer restrictions on the <span class="math inline">\(\nu_{ijm}\)</span> by allowing different weights for items and dimensions; namely, <span class="math display">\[\nu_{ijm} = a_{im}x_j.\]</span> The “nominal” model places no restrictions on the category scale values, <span class="math inline">\(\nu_{ijm}\)</span>.</p>
+<p>As a default, the package sets <span class="math inline">\(\nu_{ijm}\)</span> to equally spaced numbers where <span class="math inline">\(\sum_{j}\nu_{ijm}=0\)</span> and <span class="math inline">\(\sum_j\nu_{ijm}^2=1\)</span>. These are starting values when fitting the nominal model and are the fixed <span class="math inline">\(x_j\)</span>’s for the Rasch and GPCM. For both Rasch and GPCM, the <span class="math inline">\(x_j\)</span>’s typically are set to equally spaced numbers; however, in the LMA framework, the <span class="math inline">\(x_j\)</span>’s need not be equally spaced nor the same over items. In other words, the ‘pleLMA’ package allows for flexible category scaling and the user can set the <span class="math inline">\(x_j\)</span> to whatever they want.</p>
+</div>
+</div>
+<div id="the-pseudo-likelihood-algorithm" class="section level1">
+<h1>The Pseudo-likelihood Algorithm</h1>
+<p>Important for the pseudo-likelihood algorithm are the conditional distributions of the probability of a response on one item given values on all the others. The algorithm maximizes the product of the (log) likelihoods for all the conditionals, which can be done by using maximum likelihood of the conditional distributions. The conditional models that ‘pleLMA’ uses are <span class="math display">\[ P(Y_{in}=j|\mathbf{y_{-i,n}})  =  \frac{\exp (\lambda_{ij} + \nu_{ijm} \sum_{k\ne i}\sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n) m&#39;})} { \sum_h \exp(\lambda_{ih} + \nu_{ihm} \sum_{k\ne i}\sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n) m&#39;})} \hspace{1in}  \\ 
+ =  \frac{\exp (\lambda_{ij} + \nu_{ijm}\tilde{\theta}_{-i,mn})} { \sum_h \exp(\lambda_{ih} + \nu_{ihm} \tilde{\theta}_{-i,mn})}\qquad\qquad (1)\\
+ =  \frac{\exp (\lambda_{ij} + \sum_{m&#39;}\sigma_{mm&#39;}\ddot{\theta}_{ijm&#39;n})} { \sum_h \exp(\lambda_{ih} + \sum_{m&#39;}\sigma_{mm&#39;}\ddot{\theta}_{ijm&#39;n})}, \qquad (2)\]</span> where <span class="math inline">\(n\)</span> indicates a specific individual (subject, case, respondent, etc), <span class="math inline">\(\mathbf{y_{-i,n}}\)</span> are responses by person <span class="math inline">\(n\)</span> to all items except item <span class="math inline">\(i\)</span>, the subscript <span class="math inline">\(\ell(n)\)</span> indicates that person <span class="math inline">\(n\)</span> selected category <span class="math inline">\(\ell\)</span> on item <span class="math inline">\(k\)</span>, and the predictor variables <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> and <span class="math inline">\(\ddot{\theta}_{ijm&#39;n}\)</span> are functions of the parameters representing interactions.</p>
+<p>The predictor <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> in (1) are weighted sums of person <span class="math inline">\(n\)</span>’s category scale values for <span class="math inline">\(k\ne i\)</span>, <span class="math display">\[\tilde{\theta}_{-i,mn} = \sum_{k\ne i} \sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n)m&#39;}.\]</span> Fitting the conditional multinomial logistic regression model (1) using <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> yields estimates of <span class="math inline">\(\lambda_{ij}\)</span> and <span class="math inline">\(\nu_{ijm}\)</span> parameters. We refer to these as “item regressions” because we are fitting models to each item.</p>
+<p>In (2), the predictors are defined as <span class="math display">\[\ddot{\theta}_{-i,jm&#39;n} = \nu_{ijm}\sum_{k\ne i} \nu_{kl(n)m&#39;}.\]</span> for each <span class="math inline">\(m&#39;=1,\ldots, M\)</span>. The predictor <span class="math inline">\(\ddot{\theta}_{-i,jm&#39;n}\)</span> not only depends on the individual, but also on the category <span class="math inline">\(j\)</span> of item <span class="math inline">\(i\)</span> that is used in model in (2). In particular, the sum is multiplied by <span class="math inline">\(\nu_{ijm}\)</span>. Using <span class="math inline">\(\ddot{\theta}_{-i,jm&#39;n}\)</span> yields estimates of <span class="math inline">\(\lambda_{ij}\)</span> and all of the <span class="math inline">\(\sigma_{mm&#39;}\)</span>s. The <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters are restricted to be equal over ‘equations’ for different items and this restriction is built into the algorithm by stacking all the data (i.e., ‘stacked regressons’)</p>
+<p>The algorithm is modular and has two major components.</p>
+<ol style="list-style-type: decimal">
+<li><p>Uses <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> in (1) to obtain estimates of the <span class="math inline">\(\lambda_{ij}\)</span> and <span class="math inline">\(\nu_{ijm}\)</span> (nominal model) or <span class="math inline">\(a_{im}\)</span> (GPCM) parameters, and</p></li>
+<li><p>Uses <span class="math inline">\(\ddot{\theta}_{-i,jm&#39;n}\)</span> in (2) to obtain estimates of <span class="math inline">\(\lambda_{ij}\)</span> and the <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters.</p></li>
+</ol>
+<p>The two components are combined to estimate LMA models corresponding to multidimensional GPCM or nominal models.</p>
+<p>All algorithms work with a Master data set that is a vertical concatenation of the data for each category of each item and for each individual (i.e., a stacked data set). The number of rows equals the number of cases<span class="math inline">\(\times\)</span> number of items <span class="math inline">\(\times\)</span> number of categories per item. Model (1) is fit to a sub-set of the Master data set for a specific item (“item data” for item regressions), and model (2) is fit to the entire Master data set (“stacked data” for stacked regressions). The Master data set is properly formatted for input to ‘mnlogit’, which also means that sub-sets are properly formatted.</p>
+<div id="alogrithm-i-estimation-of-lambda_ij-and-nu_ijm-or-a_im" class="section level3">
+<h3>Alogrithm I: Estimation of <span class="math inline">\(\lambda_{ij}\)</span> and <span class="math inline">\(\nu_{ijm}\)</span> (or <span class="math inline">\(a_{im}\)</span>)</h3>
+<ol style="list-style-type: decimal">
+<li>Up-date category scores by for each item i= 1,…, I:
+<ol style="list-style-type: lower-roman">
+<li>Create item data for modeling item <span class="math inline">\(i\)</span> and compute weighted rest-scores <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> using the current values of the parameters.</li>
+<li>Up-date <span class="math inline">\(\nu_{ijm}\)</span>s by fitting (1) to the item data for item <span class="math inline">\(i\)</span> with <span class="math inline">\(\tilde{\theta}_{-i,mn}\)</span> as the predictor variable.<br />
+</li>
+<li>Save the log likelihood and up-dated <span class="math inline">\(\nu_{ijm}\)</span>s in the log file and the master data set.</li>
+<li>Repeat steps (i) through (iii) until all item category scores have been up-dated.</li>
+</ol></li>
+<li>Check convergence
+<ol style="list-style-type: lower-roman">
+<li>If the algorithm has not converged go back to step 1.</li>
+<li>If the algorithm has converged, compute and save results.</li>
+</ol></li>
+</ol>
+<p>Algorithm I requires values for <span class="math inline">\(\sigma_{mm&#39;}\)</span>. For uni-dimensional models, we can set <span class="math inline">\(\sigma_{11}=1\)</span>, and for multidimensional models we need to input a matrix of <span class="math inline">\(\sigma_{mm&#39;}\)</span>s. The matrix could be based on prior knowledge or obtained by running Algorithm II. By default, the ‘pleLMA’ package sets starting values for matrix of the <span class="math inline">\(\sigma_{mm&#39;}\)</span>s equal to an identity matrix.</p>
+<p>To obtain the <span class="math inline">\(a_{im}\)</span> parameters of the GPCM requires a slight change in the computation of the predictor variables; namely, <span class="math display">\[\nu_{ijm}\tilde{\theta}_{-i,mn} 
+= \nu_{ijm}\sum_{k\ne i} \sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n)m&#39;} \\
+\qquad\qquad= a_{im} x_j\sum_{k\ne i} \sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n)m&#39;} \\
+\qquad\qquad = a_{im} (x_j\sum_{k\ne i} \sum_{m&#39;} \sigma_{mm&#39;}\nu_{k\ell(n)m&#39;}) \\
+\qquad\qquad = a_{im}\grave{\theta}_{-i,jmn}.\]</span></p>
+<p>The predictor variables is <span class="math inline">\(\grave{\theta}_{-i,jmn}\)</span> and the coefficient for this predictor variable will be <span class="math inline">\(a_{im}\)</span>.</p>
+</div>
+<div id="alogrithm-ii-estimation-of-lambda_ijs-and-sigma_mm" class="section level3">
+<h3>Alogrithm II: Estimation of <span class="math inline">\(\lambda_{ij}\)</span>s and <span class="math inline">\(\sigma_{mm&#39;}\)</span></h3>
+<ol style="list-style-type: decimal">
+<li>Compute and add the <span class="math inline">\(\ddot{\theta}_{-i,jm&#39;n}\)</span> predictors to the stacked data</li>
+<li>Fit a single discrete choice model to the stacked data.</li>
+<li>Save results.</li>
+</ol>
+<p>By fitting (2) to the stacked the data, the equality restrictions on the <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters over the items are imposed.</p>
+</div>
+<div id="algorithm-iii-estimation-of-lambda_ij-nu_ijm-or-a_im-and-sigma_mm" class="section level3">
+<h3>Algorithm III: Estimation of <span class="math inline">\(\lambda_{ij}\)</span>, <span class="math inline">\(\nu_{ijm}\)</span> (or <span class="math inline">\(a_{im}\)</span>), and <span class="math inline">\(\sigma_{mm&#39;}\)</span>:</h3>
+<ol style="list-style-type: decimal">
+<li>Run Algorithm I to get estimates for <span class="math inline">\(\nu_{ijm}\)</span> (or <span class="math inline">\(a_{im}\)</span>) using starting values for <span class="math inline">\(\nu_{k\ell m}\)</span> and <span class="math inline">\(\sigma_{mm&#39;}\)</span>s.</li>
+<li>Run Algorithm II to get estimates of <span class="math inline">\(\sigma}_{mm&#39;}\)</span> using current values of <span class="math inline">\(\nu_{ijm}\)</span>s.</li>
+<li>Impose scaling constraint.</li>
+<li>Run Algorithm I to get estimates for <span class="math inline">\(\nu_{ijm}\)</span> (or <span class="math inline">\(a_{im}\)</span>) using currents values for <span class="math inline">\(\nu_{k\ell m}\)</span> and <span class="math inline">\(\sigma_{mm&#39;}\)</span>s.</li>
+<li>Check convergence by comparing the maximum of the absolute value of the difference between the likelihoods on the last two iterations.
+<ol style="list-style-type: lower-alpha">
+<li>If the algorithm has not converged repeat steps 2 through 4.</li>
+<li>If the algorithm has converged, compute statistics and save output.</li>
+</ol></li>
+</ol>
+<p>When combining Algorithms I and II, a new step is added to Algorithm III: imposing a scaling identification constraint. This is required for the joint distribution (i.e., LMA model). Without the required identification constraint, the Algorithm III will not converge. This can be seen in the scaling constraint, because scale values could become very large and association parameters very small but their products remain the same. To impose the scaling identification constraint, the conditional covariance matrix is transformed into a conditional correlation matrix; that is, <span class="math inline">\(\sigma_{mm}^{*}=\sigma_{mm} \times c = 1\)</span> and <span class="math inline">\(\sigma_{mm&#39;}^{*}=\sigma_{mm&#39;} \times \sqrt{c}\)</span>. The scale values also need to be adjusted, <span class="math inline">\(\nu_{ijm}^{*} = \nu_{ijm}/\sqrt{c}\)</span>. The method of imposing the scaling identification constraint differs from <span class="citation">Paek and Anderson (2017)</span> who used an option in SAS PROC MDC that allows parameters to be fixed to particular values.</p>
+<p>The order of steps 2 and 3 in Algorithm III is not of great importance, but is more a matter of convenience. In Algorithm III, we started with up-dating estimates of the <span class="math inline">\(\nu_{ijm}\)</span> parameters, which can set the algorithm in a good starting place (i.e., guard again non-singular estimates of <span class="math inline">\(\mathbf{\Sigma}\)</span> in the first iteration). At convergence, the value of the maximum log likelihood from Algorithm III step 2 (i.e., ‘mlpl.phi’) equals the maximum likelihood from the stacked regression and it also equals the sum over items’ maximum likelihoods from step 4 (i.e., ‘mlpl.item’). These are the maximums of the log of the pseudo-likelihood function and should be equal. Also, at convergence, <span class="math inline">\(\sigma_{mm} = 1\)</span> within rounding error.</p>
+<p>Different models use the different algorithms. The models and the required algorithm as shown in the following table.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Dimensions</th>
+<th>Model</th>
+<th>Algorithm</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>Independence</td>
+<td>II</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Rasch family</td>
+<td>II</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>GPCM</td>
+<td>I</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Nominal</td>
+<td>I</td>
+</tr>
+<tr class="odd">
+<td>&gt; 1</td>
+<td>Rasch family</td>
+<td>II</td>
+</tr>
+<tr class="even">
+<td>&gt; 1</td>
+<td>GPCM</td>
+<td>III</td>
+</tr>
+<tr class="odd">
+<td>&gt; 1</td>
+<td>Nominal</td>
+<td>III</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>For dichotomous items, the 1pl model is just a Rasch model and the 2pl model is the same as a uni-dimensional GPCM and Nominal model. Also for <span class="math inline">\(x_j=1,2, \ldots, J\)</span> and <span class="math inline">\(M=1\)</span>, the uniform association model for 2-way tables is a special case of the Rasch model. The multidimensional Rasch models can be thought of as generalizations of the uniform association model to higher-way tables (<span class="citation">Anderson, Kateri, and Moustaki (2021)</span>).</p>
+<p>Algorithm II was proposed by <span class="citation">Anderson, Li, and Vermunt (2007)</span> for models in the Rasch family, and Algorithms I and III for the nominal model were proposed and studied by <span class="citation">Paek (2016)</span> (<span class="citation">Paek and Anderson (2017)</span>). Algorithms I and III for the GPCM and adapting Algorithm II for the independence models are (as far as I know) novel here. Using relatively small data sets (simulated and data from various studies), the parameters estimates from MLE and PLE for the LMA models are nearly identical and <span class="math inline">\(r\ge .98\)</span>.</p>
+</div>
+</div>
+<div id="the-package" class="section level1">
+<h1>The Package</h1>
+<p>The ‘pleLMA’ package uses base R for data manipulation, ‘stats’ for specifying formulas, and ‘graphics’ for plotting results. The current package uses the ‘mnlogit’ package (<span class="citation">Hasan, Wang, and Mahani (2016)</span>) to the fit the conditional multinomial models (i.e., discrete choice models) to the data. We expect that given the use of base R, stats and graphics that the package will be forward compatible with future releases of R.</p>
+<p>The function ‘ple.lma’ is the main wrapper function that takes as input the data and model specifications. This function calls three functions that perform the following tasks:</p>
+<ol style="list-style-type: decimal">
+<li>Check for errors in the data and model specifciation using function ‘error check’</li>
+<li>Set up the problem using the function ‘set.up’</li>
+<li>Fit the model to data by calling either ‘fit.independence’, ‘fit.rasch’, ‘fit.gpcm’ or ‘fit.nominal’</li>
+</ol>
+<p>The functions in steps 1, 2 and 3 can be run outside of the ‘ple.lma’ function. Functions that are called within the model fitting functions are also available, but these typically would not be run independently.</p>
+<p>Many objects and a lot of information is produced by ‘ple.lma’ and a table with a full list of these objects along with their descriptions are provided in the appendix. Auxiliary or utility functions are provided to aid in examining and saving results that are most likely of interest. Most of the functions in the table below are run after a model has been fit to the data. There are two exception which are used internally to determine convergence of the ple algorithm, but can also be used to examine convergence on an item by parameter basis.</p>
+<table>
+<colgroup>
+<col width="31%"></col>
+<col width="68%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Auxiliary Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>lma.summary</td>
+<td>Produces a summary of results</td>
+</tr>
+<tr class="even">
+<td>convergences.stats</td>
+<td>Statistics used to assess convergence of the Nominal model</td>
+</tr>
+<tr class="odd">
+<td>convergenceGPCM</td>
+<td>Statistics use to assess convergnece of the GPCM</td>
+</tr>
+<tr class="even">
+<td>iteration.plot</td>
+<td>Plots estimated paramaters x iteration for GPCM and Nominal models</td>
+</tr>
+<tr class="odd">
+<td>scalingPlot</td>
+<td>Graphs estimated scale value by integers for the Nominal model</td>
+</tr>
+<tr class="even">
+<td>reScaleItem</td>
+<td>Changes the scaling identification constraint by putting it on the category scale values (Nominal model)</td>
+</tr>
+<tr class="odd">
+<td>theta.estimates</td>
+<td>Computes individuals’ estimated values on the latent traits</td>
+</tr>
+</tbody>
+</table>
+<p>The use of all these functions are illustrated below.</p>
+<div id="set-up" class="section level2">
+<h2>Set Up</h2>
+<div id="install-and-load-package" class="section level3">
+<h3>Install and Load Package</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(pleLMA)</a></code></pre></div>
+</div>
+<div id="the-data" class="section level3">
+<h3>The Data</h3>
+<p>Two data sets are included with the package: “vocab” which has responses by 1,309 individuals to 10 dichotomous items, and “dass” which has responses by 1,000 individuals to 42 four-category items. The vocab data frame contains responses to vocabulary items from the 2018 General Social Survey and were retrieved July 2019 from <a href="https://gss.norc.org" class="uri">https://gss.norc.org</a>. For dichtomous data, the GPCM and Nominal models correspond to a two parameter logistic model and these data are used to illustrate the equvalency.</p>
+<p>The larger “dass” data set, which is primarily using in this document (retrieved July, 2020 from <a href="https://openpsychometrics.org" class="uri">https://openpsychometrics.org</a>), consists of responses collected online during the period of 2017 – 2019 to 42 4-category items from the 38,776 respondents. Only a random sample of 1,000 is included with the package. The items were presented online to respondents in a random order. The items included in dass are responses to item on scales designed to measure depression (d1–d14), anxiety (a1–a13), and stress (s1–s15). To attach the data,</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">data</span>(dass)</a></code></pre></div>
+<p>and for more information including the items themselves and the response scale, enter</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">?dass</a></code></pre></div>
+<p>The data should be a data frame where the rows are individuals or cases and the columns are different variables or items that will be modeled. The rows can be thought of as response patterns or cells of a cross-classification of the categorical variables. Within the data frame, the categories for each variable should run from 1 to the number of categories. In this version of the package, the number of categories per variable should all be the same; therefore, there should be at least one repsonse for each category of each variable (required by “mnlogit”). There are no other restrictions on the number of categories.</p>
+</div>
+</div>
+<div id="basic-syntax-of-ple.lma" class="section level2">
+<h2>Basic syntax of ‘ple.lma’</h2>
+<p>The basic syntax of the wrapper function ‘ple.lma’ is presented below with information about the input to the function. In the following sections, we go through a number of examples showing the usage of ‘ple.lma’ and auxliary functions. The function syntax is</p>
+<p>ple.lma(inData, model.type, inItemTraitAdj = NULL, inTraitAdj = NULL, tol = NULL, starting.sv = NULL, starting.phi = NULL)</p>
+<p>All models require data (inData) as described above and a model type. The possible values for model.type are</p>
+<ul>
+<li>“independence” – the log-linear model of independence where only <span class="math inline">\(\lambda_ij\)</span>s are estimated.</li>
+<li>“rasch” – models in the Rasch family where <span class="math inline">\(\nu_{ijm}=x_j\)</span></li>
+<li>“gpcm” – generalized partial credit model where <span class="math inline">\(\nu_{ijm}=a_{im}x_j\)</span></li>
+<li>“nominal” – nominal model where <span class="math inline">\(\nu_{ijm}\)</span> are estimated with no restrictions.</li>
+</ul>
+<p>By default, the package sets <span class="math inline">\(x_j\)</span> to equally spaced numbers centered at 0 and the sums of the squares equals 1. These values also act as starting values for the Nominal model. In the LMA framework, the <span class="math inline">\(x_j\)</span>’s for the Rasch and GPCM models need not be equally spaced nor the same over items. In other words, the pleLMA package allows for flexible category scaling (i.e., <span class="math inline">\(x_{ij}\)</span>). The ‘pleLMA’ package allows the user to set these number to desired values.</p>
+<p>For the Rasch, GPCM and Nominal models both “inItemTraitAdj” and “inTraitAdj” must be given to complete the minimal model specification. The object “inTraitAdj” is an <span class="math inline">\((M\times M)\)</span> trait by trait adjacency matrix where a 1 indicates that traits are correlated and 0 uncorrelated. The object “inItemTraitAdj” is an <span class="math inline">\((I\times M)\)</span> item by trait adjacency matrix where a 1 indicates the item is directly related to a latent variable and 0 otherwise. Only one 1 should be in each the row of “inItemTraitAdj”.</p>
+<p>The remaining objects are optional. The value given for &quot;tol’ determines whether the pseudo-likelihood algorithm has converged. The algorithm is said to have converged when <span class="math inline">\(\mbox{criterion} &lt; \mbox{tau}\)</span> where the critierion equals the maximum over items of the absolute values of difference between items’ log likelihood from the last two iterations. The default is <span class="math inline">\(\mbox{tol} =1e-06\)</span>, which is fairly strong. Since the independence and Rasch model are fit only once, they do not require a tolerence value for the pseudo-likelihood algorthim.</p>
+<p>The user can specify the starting values of the scale values for the Nominal model or the fixed <span class="math inline">\(x_j\)</span>s for the GPCM and Rasch models. This is done using “starting.sv”, which is an item by <span class="math inline">\(\nu_{ijm}\)</span>s (or <span class="math inline">\(x_j\)</span>s) matrix. The default are the values are equally spaced, sum over categories equals zero, and the sum of squares equals 1.</p>
+<p>The last option is to input a matrix of starting value(s) for the <span class="math inline">\(\sigma_{mm&#39;}\)</span>, which within the package the <span class="math inline">\(\sigma_{mm&#39;}\)</span> are referred to as “<strong>phi</strong>” parameters. This is the terminology used in the RC(M) association and LMA literature. The default is an identity matrix.</p>
+</div>
+<div id="example-i9-items-j4-categories-n250-cases" class="section level2">
+<h2>Example: <span class="math inline">\(I=9\)</span> items, <span class="math inline">\(J=4\)</span> categories, <span class="math inline">\(N=250\)</span> cases</h2>
+<p>The dass data used in this example consists of a subset N=250 cases and 3 items from each of three scale designed to measure depression (d1-d3), anxiety (a1-a3), and stress (s1-s3). The input data frame, inData, is created by follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">data</span>(dass)</a>
+<a class="sourceLine" id="cb4-2" title="2">items.to.use &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;d1&quot;</span>,<span class="st">&quot;d2&quot;</span>,<span class="st">&quot;d3&quot;</span>,<span class="st">&quot;a1&quot;</span>,<span class="st">&quot;a2&quot;</span>,<span class="st">&quot;a3&quot;</span>,<span class="st">&quot;s1&quot;</span>,<span class="st">&quot;s2&quot;</span>,<span class="st">&quot;s3&quot;</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3">inData &lt;-<span class="st"> </span>dass[<span class="dv">1</span><span class="op">:</span><span class="dv">250</span>,(items.to.use)]</a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="kw">head</span>(inData)</a></code></pre></div>
+<pre><code>##   d1 d2 d3 a1 a2 a3 s1 s2 s3
+## 1  3  3  3  1  3  1  1  1  2
+## 2  2  2  2  1  1  1  2  1  2
+## 3  4  2  4  1  1  1  4  4  4
+## 4  1  4  1  2  1  1  3  2  2
+## 5  2  4  3  1  1  1  3  3  3
+## 6  3  3  2  4  3  1  4  4  4</code></pre>
+<div id="uni-dimensional-models-m1" class="section level3">
+<h3>Uni-dimensional Models: <span class="math inline">\(M=1\)</span></h3>
+<p>Uni-dimensional model are those where there is only one latent trait (i.e., <span class="math inline">\(M=1\)</span>). In graphical modeling terms, each observed categorical variable is directly related to the continuous (latent) varable and the categorical variables are independent conditional of the continuous varaible.</p>
+<div id="input" class="section level4">
+<h4>Input</h4>
+<p>The minimal commands for each type of model are given below. Since there are no interactions in the independence log-linear model, only 2 objects are required; namely,</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">#--- Log-linear model of Independence</span></a>
+<a class="sourceLine" id="cb6-2" title="2">ind &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;independence&quot;</span>)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<p>For all models, two messages are printed to the console: “No errors detected in the input” and “Basic set up is complete”. The first step in ‘ple.lma’ is to check the input for 11 possible errors. If an error is detected, the function will stop and issue an error message stating the problem. If no errors are detected, the function continues on to set up the data and objects needed by all models. Subsequently, the pseudo-likelihood algorithm begins.</p>
+<p>For the models other than indepenendence, the trait <span class="math inline">\(\times\)</span> trait adjacency matrix for <span class="math inline">\(M=1\)</span> is simply a <span class="math inline">\((1\times 1)\)</span> matrix of all ones; that is,</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">(inTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow=</span><span class="dv">1</span> ,<span class="dt">ncol=</span><span class="dv">1</span>))</a></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    1</code></pre>
+<p>The item <span class="math inline">\(\times\)</span> trait adjacency matrix is an <span class="math inline">\((I\times M)\)</span> matirx, which for simple uni-dimensional models is a vector of ones,</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">(inItemTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow=</span><span class="kw">ncol</span>(inData), <span class="dt">ncol=</span><span class="dv">1</span>) )</a></code></pre></div>
+<pre><code>##       [,1]
+##  [1,]    1
+##  [2,]    1
+##  [3,]    1
+##  [4,]    1
+##  [5,]    1
+##  [6,]    1
+##  [7,]    1
+##  [8,]    1
+##  [9,]    1</code></pre>
+<p>For models in the Rasch family, we simply add the adjacency matries and change the model.type,</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co">#--- Model in the rasch family</span></a>
+<a class="sourceLine" id="cb13-2" title="2">r1 &lt;-<span class="st">  </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;rasch&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<p>The independence log-linear model and models in the Rasch family only involve iterations within the package ‘mnlogit’. The tolerance and convergence information reported for these models are from ‘mnlogit’ of the stacked regression .</p>
+<p>The GPCM and Nominal models involve iteratively fitting discrete choice models (i.e., conditional multinomial logistic regression models). In addition to messages about errors and set up, information is printed to the console about the progress of the algorithm. For the GPCM, the minimal input is</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co">#--- Generalized partial credit model</span></a>
+<a class="sourceLine" id="cb16-2" title="2">g1 &lt;-<span class="st">  </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;gpcm&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<pre><code>## [1] &quot;3.69889486681001 &gt; 1e-06&quot;
+## [1] &quot;1.08069902531423 &gt; 1e-06&quot;
+## [1] &quot;0.487348105030833 &gt; 1e-06&quot;
+## [1] &quot;0.0911130954370947 &gt; 1e-06&quot;
+## [1] &quot;0.0120229012337063 &gt; 1e-06&quot;
+## [1] &quot;0.00599175559784726 &gt; 1e-06&quot;
+## [1] &quot;0.0016258872317394 &gt; 1e-06&quot;
+## [1] &quot;0.000135284849534401 &gt; 1e-06&quot;
+## [1] &quot;6.5337454998371e-05 &gt; 1e-06&quot;
+## [1] &quot;2.59626516481148e-05 &gt; 1e-06&quot;
+## [1] &quot;3.67867289696733e-06 &gt; 1e-06&quot;
+## [1] &quot;The Alogithm has converged: 7.24560891285364e-07 &lt; 1e-06&quot;</code></pre>
+<p>For each iteration of the pseudo-likelihood algorithm, the both the convergence criterion (i.e., the maximum absolute difference between items’ log likelihoods from the item regressions from the current and previous iteration) and the tolerance is printed to the console. In this case, the criterion decreases until it is less than the tolerance (default is 1e-06).</p>
+<p>The minimal input for the nominal model is</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="co">#--- Nominal response model</span></a>
+<a class="sourceLine" id="cb20-2" title="2">n1 &lt;-<span class="st">  </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;nominal&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<pre><code>## [1] &quot;236.649900724201 &gt; 1e-06&quot;
+## [1] &quot;2.71035273432182 &gt; 1e-06&quot;
+## [1] &quot;0.840025530686773 &gt; 1e-06&quot;
+## [1] &quot;0.287426180234718 &gt; 1e-06&quot;
+## [1] &quot;0.0515304028613741 &gt; 1e-06&quot;
+## [1] &quot;0.00793552086946647 &gt; 1e-06&quot;
+## [1] &quot;0.00194535478169655 &gt; 1e-06&quot;
+## [1] &quot;0.000510250419097247 &gt; 1e-06&quot;
+## [1] &quot;5.78027153892435e-05 &gt; 1e-06&quot;
+## [1] &quot;3.59947190986531e-05 &gt; 1e-06&quot;
+## [1] &quot;1.67384064297948e-05 &gt; 1e-06&quot;
+## [1] &quot;2.89708532363875e-06 &gt; 1e-06&quot;
+## [1] &quot;Alogithm has converged: 3.44122241813238e-07 &lt; 1e-06&quot;</code></pre>
+<p>The option “starting.sv” is an (I x J) matrix of starting scale values (i.e., the <span class="math inline">\(\nu_{ijm}\)</span>s) for Nominal models and are the fixed category scores <span class="math inline">\(x_j\)</span> (or <span class="math inline">\(x_{ij}\)</span>) for the Rasch and GPCMs. If the user wants to use values other than the default values, they can be input using “starting.sv”. For example, instead of equally spaced, centered, and scaled <span class="math inline">\(x_j\)</span>,</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">xj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>), <span class="dt">nrow=</span><span class="dv">9</span>, <span class="dt">ncol=</span><span class="dv">4</span>, <span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb24-2" title="2">g1b &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(inData, inItemTraitAdj, inTraitAdj, <span class="dt">model.type=</span><span class="st">&quot;gpcm&quot;</span>, <span class="dt">starting.sv=</span>xj)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<pre><code>## [1] &quot;19.5690090045299 &gt; 1e-06&quot;
+## [1] &quot;16.3282987513332 &gt; 1e-06&quot;
+## [1] &quot;2.50602954945845 &gt; 1e-06&quot;
+## [1] &quot;0.465388638886907 &gt; 1e-06&quot;
+## [1] &quot;0.186234011089994 &gt; 1e-06&quot;
+## [1] &quot;0.0270392602000697 &gt; 1e-06&quot;
+## [1] &quot;0.0105616367803805 &gt; 1e-06&quot;
+## [1] &quot;0.00420017331703093 &gt; 1e-06&quot;
+## [1] &quot;0.000631168798918225 &gt; 1e-06&quot;
+## [1] &quot;0.000126195818211272 &gt; 1e-06&quot;
+## [1] &quot;5.83288578468455e-05 &gt; 1e-06&quot;
+## [1] &quot;1.27835623970896e-05 &gt; 1e-06&quot;
+## [1] &quot;1.80859996135041e-06 &gt; 1e-06&quot;
+## [1] &quot;The Alogithm has converged: 7.69594919347583e-07 &lt; 1e-06&quot;</code></pre>
+<p>Full discussion of the available output is discussed later, but for now to determine which model is better, we take a quick look at the values of the maximum of the log pseudo-likelihood function, which equal -2427.4400606 for the equally spaced scores and -2537.6872898 for the un-equally spaced scores. Both models have the same number of estimated parameters but the maximum of the log of the pseudo-likelihood (MLPL) is smaller for the model with alternative scores; therefore, the original model with equally spaced scores fits the data better. If the scores had been (0, 1, 2, 3), the model fit would be identical to the default scores set by the ‘ple.lma’ function. The only difference would be in the <span class="math inline">\(\hat{a}_{im}\)</span>s. Alternative scores <span class="math inline">\(x_j\)</span> can also be input for models in the Rasch family.</p>
+<p>Using ‘starting.sv’ with the Nominal model, sets the starting values for the <span class="math inline">\(\nu_{ijm}\)</span> parameters. For all models, the starting values for <span class="math inline">\(\mathbf{\Sigma}\)</span> can also be input. For example, the nominal model can be re-fit in fewer iterations if we start it using the parameter estimates from a previous run. For example, the scale values are in ‘estimates’ and <span class="math inline">\(\sigma_{11}\)</span> is in ‘Phi.mat’.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">n1<span class="op">$</span>estimates</a></code></pre></div>
+<pre><code>##      loglike    lambda1   lambda2     lambda3     lambda4        nu1
+## d1 -271.8619 -0.3072021 0.5729386  0.20220949 -0.46794596 -0.6244714
+## d2 -278.1155 -0.6993158 0.3928989  0.32443810 -0.01802119 -0.6136358
+## d3 -269.7006 -0.4754176 0.2657661  0.09164878  0.11800270 -0.6412963
+## a1 -299.0364  0.3177562 0.3023306 -0.25703234 -0.36305449 -0.2799779
+## a2 -238.3700  1.1304292 0.9194283 -0.04690730 -2.00295021 -0.6211806
+## a3 -265.5721  0.6755937 0.4940931 -0.32983550 -0.83985136 -0.3996865
+## s1 -262.8586 -1.8326803 0.8193632  0.53566652  0.47765061 -0.8423171
+## s2 -267.1777 -1.1236020 0.4818352  0.44781900  0.19394787 -0.7782509
+## s3 -247.3727 -0.9227078 0.6880824  0.14336625  0.09125915 -0.9037258
+##            nu2         nu3       nu4
+## d1 -0.07818970  0.17098361 0.5316775
+## d2 -0.12937559  0.20606888 0.5369425
+## d3 -0.06718668  0.18456161 0.5239214
+## a1 -0.06605803 -0.01894353 0.3649794
+## a2 -0.21095776 -0.01795778 0.8500962
+## a3 -0.05546513  0.10737125 0.3477804
+## s1 -0.09575662  0.31423719 0.6238365
+## s2 -0.13235774  0.30384290 0.6067658
+## s3 -0.28199819  0.41075799 0.7749660</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1">sv &lt;-<span class="st"> </span>n1<span class="op">$</span>estimates[, <span class="dv">6</span><span class="op">:</span><span class="dv">9</span>]</a>
+<a class="sourceLine" id="cb30-2" title="2">sigma &lt;-<span class="st"> </span>n1<span class="op">$</span>Phi.mat</a>
+<a class="sourceLine" id="cb30-3" title="3">n1.alt &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;nominal&quot;</span>, inItemTraitAdj, inTraitAdj,</a>
+<a class="sourceLine" id="cb30-4" title="4">                  <span class="dt">starting.sv =</span> sv,  <span class="dt">starting.phi=</span> sigma)</a></code></pre></div>
+<pre><code>## [1] &quot;No errors detected in the input&quot;</code></pre>
+<pre><code>## Basic set up is complete</code></pre>
+<pre><code>## [1] &quot;238.369981206883 &gt; 1e-06&quot;
+## [1] &quot;Alogithm has converged: 2.50882976615685e-08 &lt; 1e-06&quot;</code></pre>
+<p>The algorithm converged after 1 full iteration.</p>
+<p>Before fitting the multidimensional models we look at the output from fitting the models.</p>
+</div>
+</div>
+<div id="output" class="section level3">
+<h3>Output</h3>
+<p>The ‘pleLMA’ package produces large number of objects, some of which are NULL. Whether objects are null or not depends on the particular LMA model to fit the data (i.e., Alogirthm I, II or III used). In the appendix is a table of all 28 objects in the output and a brief description of each of them. The table also indicates whether a particular alogrithm used the object (i.e., the object is NULL or not NULL)</p>
+<p>Typically not all of the objects in output need to be examined. The function ‘lma.summary( )’ organizes a summary of output that is likely to be of most importance and probably saved. The function ‘lma.summary( )’ yields a list with five elements:</p>
+<ol style="list-style-type: decimal">
+<li>“report” – A report of information about the data, convergence, and fit statistics,</li>
+<li>“TraitByTrait” – the Trait <span class="math inline">\(\times\)</span> Trait adjacency matrix,</li>
+<li>“ItemByTrait” – the Item <span class="math inline">\(\times\)</span> Trait matrix,</li>
+<li>“estimates” – estimated <span class="math inline">\(\lambda_{ij}\)</span> and <span class="math inline">\(\nu_{ijm}\)</span> or <span class="math inline">\(a_{im}\)</span> (and <span class="math inline">\(x_j\)</span>’s for gpcm and rasch models).</li>
+<li>&quot;phi – estimated <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters</li>
+</ol>
+<p>For example, you can get a summary by entering</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1">n1.summary &lt;-<span class="st"> </span><span class="kw">lma.summary</span>(n1)</a></code></pre></div>
+<p>You can also request specific sections as follows. For the basic summary report,</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1"><span class="kw">noquote</span>(<span class="kw">lma.summary</span>(n1)<span class="op">$</span>report)</a></code></pre></div>
+<pre><code>##       [,1]                                                       
+##  [1,]                                                            
+##  [2,] =========================================================  
+##  [3,] Pseudo-likelihood Estimation of nominal model              
+##  [4,] =========================================================  
+##  [5,] Report Date:  2021-04-26 11:47:26                          
+##  [6,]                                                            
+##  [7,] Data Information:                                          
+##  [8,]    Number of cases/individuals  250                        
+##  [9,]    Number of items  9                                      
+## [10,]    Number of categories per item 4                         
+## [11,]    Number of dimensions:  1                                
+## [12,]                                                            
+## [13,] Model Specification:                                       
+## [14,]   Number of unique parameters 54                           
+## [15,]   Number of unique marginal effects:  27                   
+## [16,]   Number of unique category parameters (nu&#39;s or a&#39;s):  27  
+## [17,]   Number of unique association parameters (phis): 0        
+## [18,]                                                            
+## [19,] Convergence Information:                                   
+## [20,]   Number of iterations:  13                                
+## [21,]   Tolerence set tol 1e-06                                  
+## [22,]   Criterion  3.44122241813238e-07                          
+## [23,]                                                            
+## [24,] Model Fit Statistics:                                      
+## [25,]   Maximum log pseudo-likelihood function: -2400.06537390311
+## [26,]   AIC:   2346.06537390311                                  
+## [27,]   BIC:   4501.97185824166                                  
+## [28,]</code></pre>
+<p>AIC and BIC are included in the summary and may differ from those in the output from mnlogit. The ‘ple.lma’ package computes these as <span class="math display">\[\mbox{AIC} = -2*\mbox{mlpl} + p\]</span> <span class="math display">\[\mbox{BIC} = -2*\mbox{mlpl} + p*\log(N)\ ,\]</span> where <span class="math inline">\(\mbox{mlpl}\)</span> is the maximum of the log of the pseudo-likelihood function, <span class="math inline">\(p\)</span> is the number of parameters, and <span class="math inline">\(N\)</span> is the sample size (i.e., number of cases or individuals). Models with smaller values are better. Note that AIC tends to select more complex models and BIC tends to select simpler models. Deciding on a model should not rest solely on global statistics.</p>
+<p>For a complete record of the model specification also requires</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">lma.summary</span>(n1)<span class="op">$</span>TraitByTrait</a></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    1</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw">lma.summary</span>(n1)<span class="op">$</span>ItemByTrait</a></code></pre></div>
+<pre><code>##       [,1]
+##  [1,]    1
+##  [2,]    1
+##  [3,]    1
+##  [4,]    1
+##  [5,]    1
+##  [6,]    1
+##  [7,]    1
+##  [8,]    1
+##  [9,]    1</code></pre>
+<p>The last two are objects contain the parameter estimates,</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="co">#--- item by log likelihoods, lambdas, and nus</span></a>
+<a class="sourceLine" id="cb41-2" title="2"><span class="kw">lma.summary</span>(n1)<span class="op">$</span>estimates   </a></code></pre></div>
+<pre><code>##      loglike    lambda1   lambda2     lambda3     lambda4        nu1
+## d1 -271.8619 -0.3072021 0.5729386  0.20220949 -0.46794596 -0.6244714
+## d2 -278.1155 -0.6993158 0.3928989  0.32443810 -0.01802119 -0.6136358
+## d3 -269.7006 -0.4754176 0.2657661  0.09164878  0.11800270 -0.6412963
+## a1 -299.0364  0.3177562 0.3023306 -0.25703234 -0.36305449 -0.2799779
+## a2 -238.3700  1.1304292 0.9194283 -0.04690730 -2.00295021 -0.6211806
+## a3 -265.5721  0.6755937 0.4940931 -0.32983550 -0.83985136 -0.3996865
+## s1 -262.8586 -1.8326803 0.8193632  0.53566652  0.47765061 -0.8423171
+## s2 -267.1777 -1.1236020 0.4818352  0.44781900  0.19394787 -0.7782509
+## s3 -247.3727 -0.9227078 0.6880824  0.14336625  0.09125915 -0.9037258
+##            nu2         nu3       nu4
+## d1 -0.07818970  0.17098361 0.5316775
+## d2 -0.12937559  0.20606888 0.5369425
+## d3 -0.06718668  0.18456161 0.5239214
+## a1 -0.06605803 -0.01894353 0.3649794
+## a2 -0.21095776 -0.01795778 0.8500962
+## a3 -0.05546513  0.10737125 0.3477804
+## s1 -0.09575662  0.31423719 0.6238365
+## s2 -0.13235774  0.30384290 0.6067658
+## s3 -0.28199819  0.41075799 0.7749660</code></pre>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="co">#--- sigma_1^2</span></a>
+<a class="sourceLine" id="cb43-2" title="2"><span class="kw">lma.summary</span>(n1)<span class="op">$</span>phi</a></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    1</code></pre>
+<p>The rows of `estimates’ correspond to items and the columns the parameter estimates. The “lam”s are the marginal effects for categories 1 through 4 and the “nu”s are the category scale values. Note that only three <span class="math inline">\(\lambda_{ij}\)</span>s and three <span class="math inline">\(\nu_{ijm}\)</span>s were estimated. The fourth value is found by the identification constraint on the locations of the parameters; that is, <span class="math inline">\(\hat{\lambda}_{i1} = - \sum_{j=2}^4\hat{\lambda}_{ij}\)</span> and <span class="math inline">\(\hat{\nu}_{i1} = - \sum_{j=2}^4 \hat{\nu}_{ij}\)</span>. For the GPCM and Nominal model, the first column of ‘estimates’ contains the values of the maximum log-likelihood values from using MLE to fit each item’s item regression. The sums of these log-likelihoods equals ‘mlpl.item’.</p>
+<p>For the GPCM (and models in the Rasch family), ‘estimates’ includes the <span class="math inline">\(x_j\)</span>’s used to fit the model to data. For example,</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1">g1<span class="op">$</span>estimates</a></code></pre></div>
+<pre><code>##      loglike     lamba1    lamba2      lamba3       lamba4         a         x1
+## d1 -273.5212 -0.1366067 0.4895941  0.19915638 -0.552143755 0.8754070 -0.6708204
+## d2 -279.1964 -0.5731578 0.2981472  0.33436123 -0.059350576 0.8728512 -0.6708204
+## d3 -273.1440 -0.2915821 0.1145274  0.09507058  0.081984154 0.8497781 -0.6708204
+## a1 -302.1068  0.2861255 0.2509015 -0.27432781 -0.262699199 0.4242113 -0.6708204
+## a2 -243.3139  0.9285292 0.7411042 -0.37057057 -1.299062744 0.8250464 -0.6708204
+## a3 -268.1178  0.7339107 0.4886953 -0.33246797 -0.890137988 0.5667876 -0.6708204
+## s1 -266.8711 -1.1926597 0.5551032  0.40194028  0.235616226 0.9920283 -0.6708204
+## s2 -269.6688 -0.8145342 0.3257054  0.43824226  0.050586572 1.0340729 -0.6708204
+## s3 -251.5000 -0.8155969 0.6201395  0.19692038 -0.001463042 1.2499241 -0.6708204
+##            x2        x3        x4
+## d1 -0.2236068 0.2236068 0.6708204
+## d2 -0.2236068 0.2236068 0.6708204
+## d3 -0.2236068 0.2236068 0.6708204
+## a1 -0.2236068 0.2236068 0.6708204
+## a2 -0.2236068 0.2236068 0.6708204
+## a3 -0.2236068 0.2236068 0.6708204
+## s1 -0.2236068 0.2236068 0.6708204
+## s2 -0.2236068 0.2236068 0.6708204
+## s3 -0.2236068 0.2236068 0.6708204</code></pre>
+<p>For more detailed information about items’ regressions after convergence, output from ‘mnlogit’ is saved. All the information that can be extracted from ‘mnlogit’ objects can be obtained (e.g., residuals, various fit statistics, etc). Below are the names and classes for these objects:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Dimensions</th>
+<th>Model</th>
+<th>item.log</th>
+<th>phi.log</th>
+<th>item.mnlogit</th>
+<th>phi.mnlogit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>independence</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>mnlogit</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>rasch</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>mnlogit</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>gpcm</td>
+<td>list</td>
+<td>NULL</td>
+<td>list</td>
+<td>NULL</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>nominal</td>
+<td>list</td>
+<td>NULL</td>
+<td>list</td>
+<td>NULL</td>
+</tr>
+<tr class="odd">
+<td>&gt;1</td>
+<td>rasch</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>mnlogit</td>
+</tr>
+<tr class="even">
+<td>&gt;1</td>
+<td>gpcm</td>
+<td>list</td>
+<td>matrix</td>
+<td>list</td>
+<td>mnlogit</td>
+</tr>
+<tr class="odd">
+<td>&gt;1</td>
+<td>nominal</td>
+<td>list</td>
+<td>matrix</td>
+<td>list</td>
+<td>mnlogit</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="auxilary-functions" class="section level2">
+<h2>Auxilary Functions</h2>
+<p>To further examine the convergence of the algorithm, we can look at the log files and the convergence statistics for all parameters. For iterations (log file), we can print the value of the parameters for each iteration. The object “n1$item.log” is a list where the 3rd dimension is the item. The history of iterations for item 1 is</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">n1<span class="op">$</span>item.log[[<span class="dv">1</span>]]</a></code></pre></div>
+<p>Alternatively these can be plotted them using the function</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="kw">iterationPlot</span>(n1)</a></code></pre></div>
+<p>If you run the above command you see that algorithm gets very close to the final values in about 5 iterations, but continues to meet the more stringent criterion given by “tol”. With these data and model, using random uniform starting scale values converged in about the same number of iterations and the correct order of the scale values is found within 5 iterations.</p>
+<p>For another view of how well the algorithm converged, we can look at the differences between values from the last two iterations, which is given for each item’s maximum log-likelihood and all item parameters. The function ‘convergence.stats’ is internal to the ‘fit.nominal’ function and requires input that is not available in the model fit output. To run ‘convergance.stats’, you have to first run ‘set.up’ as follows:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1">s &lt;-<span class="st"> </span><span class="kw">set.up</span>(inData, <span class="dt">model.type=</span><span class="st">&#39;nominal&#39;</span>, inTraitAdj, inItemTraitAdj)</a>
+<a class="sourceLine" id="cb49-2" title="2"></a>
+<a class="sourceLine" id="cb49-3" title="3"><span class="kw">convergence.stats</span>(n1<span class="op">$</span>item.log, n1<span class="op">$</span>nitems, n1<span class="op">$</span>nless, s<span class="op">$</span>LambdaName, s<span class="op">$</span>NuName)</a></code></pre></div>
+<pre><code>## $diff.last.Item
+## [1] 1 2 3 4 5 6 7 8 9
+## 
+## $diff.last.LogLike
+## [1] -1.135754e-07 -1.714000e-09 -3.595849e-07  1.972672e-07  3.441222e-07
+## [6]  8.999734e-08  7.582196e-08  4.030994e-09  1.782178e-07
+## 
+## $diff.last.lam2
+## [1] -2.899275e-09 -2.412602e-09 -2.610266e-09 -8.206348e-10  2.656871e-09
+## [6]  7.331320e-10 -3.150512e-10 -5.599418e-10 -4.940359e-11
+## 
+## $diff.last.lam3
+## [1] 2.384649e-09 3.831433e-09 1.844995e-09 9.264018e-10 2.354453e-09
+## [6] 6.403919e-10 2.294988e-09 8.630995e-10 1.188768e-09
+## 
+## $diff.last.lam4
+## [1]  1.350045e-08  1.568674e-08  1.537976e-08  7.358500e-09 -3.958744e-09
+## [6] -1.727329e-09  3.935193e-09  2.510343e-09  1.418283e-09
+## 
+## $diff.last.nu2
+## [1]  1.853086e-09  2.676497e-09  2.720449e-09  1.612524e-10 -1.283265e-09
+## [6] -5.427573e-10 -1.048473e-09 -9.378177e-10 -2.186578e-09
+## 
+## $diff.last.nu3
+## [1] -2.282709e-09  9.101780e-11 -1.401513e-10  1.724816e-09 -4.642253e-11
+## [6]  2.835269e-10  2.990071e-09  2.324798e-09  2.745951e-09
+## 
+## $diff.last.nu4
+## [1] -9.994187e-09 -9.844689e-09 -9.974597e-09 -2.001206e-09  6.178669e-09
+## [6]  2.790979e-09  5.502973e-09  4.125997e-09  3.617784e-09
+## 
+## $criterion.loglike
+## [1] 3.441222e-07
+## 
+## $criterion.items
+## [1] 6.366022e-08</code></pre>
+<p>There is a “<span class="math inline">\(\$\)</span>diff.last” for the items’ maximum log likelihoods, lambda parameters, and scale values. The length of each of these corresponds to the number of items. Even though tol<span class="math inline">\(=1e-06\)</span>, the largest differences for the item parameters are considerably smaller. For the GPCM model, the command is</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1">s &lt;-<span class="st"> </span><span class="kw">set.up</span>(inData, <span class="dt">model.type=</span><span class="st">&#39;gpcm&#39;</span>, inTraitAdj, inItemTraitAdj)</a>
+<a class="sourceLine" id="cb51-2" title="2"></a>
+<a class="sourceLine" id="cb51-3" title="3"><span class="kw">convergenceGPCM</span>(g1<span class="op">$</span>item.log, g1<span class="op">$</span>nitems, g1<span class="op">$</span>ncat, g1<span class="op">$</span>nless, s<span class="op">$</span>LambdaName)</a></code></pre></div>
+<p>For the nominal model, the function ‘scalingPlot’ graphs the scale values by integers and overlays a linear regression line. These can be used to determine the proper order of categories and whether a linear restriction could be imposed on them, such as done in a GPCM. The plots also convey how strongly related the items are to the latent trait where steeper slopes indicate the stronger relationships. To produce these plots</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1"><span class="kw">scalingPlot</span>(n1)</a></code></pre></div>
+<p>To fit the models, we imposed scaling identification constraints, which for GPCM and the Nominal model were <span class="math inline">\(\sigma_{mm}= 1\)</span>. However, we can change this such that a scaling constraint is put on one item (for each latent variable) and phis (i.e., sigma’s) are estimated. This teases apart the strength and structure of the relationships between items and the latent trait. The function `reScaleItem’ rescales the values from the Nominal model. One item (per latent variable) needs to be selected on which the scaling constriant is placed, and this is indicated using a vector anchor. To do the rescaling using item d1,</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1">anchor &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dt">nrow=</span><span class="dv">1</span>, <span class="dt">ncol=</span><span class="dv">9</span>)</a>
+<a class="sourceLine" id="cb53-2" title="2">anchor[<span class="dv">1</span>,<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb53-3" title="3">    </a>
+<a class="sourceLine" id="cb53-4" title="4"><span class="kw">reScaleItem</span>(n1, <span class="dt">anchor=</span>anchor) </a></code></pre></div>
+<pre><code>## $sNu
+##          [,1]        [,2]        [,3]      [,4]
+## d1 -0.7421601 -0.09292543  0.20320740 0.6318781
+## d2 -0.7292824 -0.15375789  0.24490489 0.6381354
+## d3 -0.7621559 -0.07984877  0.21934433 0.6226603
+## a1 -0.3327429 -0.07850741 -0.02251365 0.4337639
+## a2 -0.7382491 -0.25071513 -0.02134212 1.0103064
+## a3 -0.4750119 -0.06591815  0.12760657 0.4133235
+## s1 -1.0010613 -0.11380303  0.37345874 0.7414056
+## s2 -0.9249211 -0.15730204  0.36110552 0.7211176
+## s3 -1.0740431 -0.33514393  0.48816997 0.9210171
+## 
+## $sPhi.mat
+##           [,1]
+## [1,] 0.7079946</code></pre>
+<p>If the log-multiplicative models are being used to for measurement, estimates of values on the latent variable can be computed using the estimated item category scale values and conditional variances/covariances (see formula for <span class="math inline">\(E(\theta_m|\mathbf{y})\)</span>). The function ‘theta.estimates’ will compute these values:</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">theta.r1 &lt;-<span class="st"> </span><span class="kw">theta.estimates</span>(inData, r1)</a>
+<a class="sourceLine" id="cb55-2" title="2">theta.g1 &lt;-<span class="st"> </span><span class="kw">theta.estimates</span>(inData, g1)</a>
+<a class="sourceLine" id="cb55-3" title="3">theta.n1 &lt;-<span class="st"> </span><span class="kw">theta.estimates</span>(inData, n1)</a></code></pre></div>
+<p>The rows will correspond to individuals and colums to values for each latent variable (only 1 column for uni-dimensional models).</p>
+</div>
+<div id="multi-dimensional-models-m1" class="section level2">
+<h2>Multi-dimensional models, <span class="math inline">\(M&gt;1\)</span></h2>
+<p>Since the items of dass are designed to assess three difference constructs, we fit a 3-dimensional model and allow the latent variables to be conditionaly correlated (i.e, within response pattern). We only need to change ‘inTraitAdj’ and ‘inItemTraitAdj’ to fit these models. For the Trait by Trait adjacency matrix,</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" title="1">(inTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow=</span><span class="dv">3</span> ,<span class="dt">ncol=</span><span class="dv">3</span>))</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    1    1
+## [2,]    1    1    1
+## [3,]    1    1    1</code></pre>
+<p>The one’s in the off-diagonal indicate that latent variables are to be conditionally correlated. If we don’t want for example <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span> to be correlated, a 0 should be put in the (1,2) and (2,1) cells of the matrix.</p>
+<p>For the Item by Trait adjacency matrix,</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" title="1">d &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),<span class="dt">nrow=</span><span class="dv">3</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb58-2" title="2">a &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>),<span class="dt">nrow=</span><span class="dv">3</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb58-3" title="3">s &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>),<span class="dt">nrow=</span><span class="dv">3</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb58-4" title="4">das &lt;-<span class="st"> </span><span class="kw">list</span>(d, a, s)</a>
+<a class="sourceLine" id="cb58-5" title="5">(inItemTraitAdj  &lt;-<span class="st"> </span><span class="kw">rbind</span>(das[[<span class="dv">1</span>]], das[[<span class="dv">2</span>]], das[[<span class="dv">3</span>]]))</a></code></pre></div>
+<pre><code>##       [,1] [,2] [,3]
+##  [1,]    1    0    0
+##  [2,]    1    0    0
+##  [3,]    1    0    0
+##  [4,]    0    1    0
+##  [5,]    0    1    0
+##  [6,]    0    1    0
+##  [7,]    0    0    1
+##  [8,]    0    0    1
+##  [9,]    0    0    1</code></pre>
+<p>The commands to fit the models are the same</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1">r3 &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;rasch&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## Basic set up is complete</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" title="1">g2 &lt;-<span class="st">  </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;gpcm&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## Basic set up is complete</code></pre>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" title="1">n3 &lt;-<span class="st">  </span><span class="kw">ple.lma</span>(inData, <span class="dt">model.type=</span><span class="st">&quot;nominal&quot;</span>, inItemTraitAdj, inTraitAdj)</a></code></pre></div>
+<pre><code>## Basic set up is complete</code></pre>
+<p>The same evaluation and post fitting functions can be used. The one change is that iteration plots of phis (and lambdas) from iterations can graphed as well as of item statistics using</p>
+<pre class="{r}."><code>iterationPlot(n3)</code></pre>
+<p>Further more,</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1"><span class="kw">noquote</span>(<span class="kw">lma.summary</span>(n3)<span class="op">$</span>report) </a></code></pre></div>
+<pre><code>##       [,1]                                                       
+##  [1,]                                                            
+##  [2,] =========================================================  
+##  [3,] Pseudo-likelihood Estimation of nominal model              
+##  [4,] =========================================================  
+##  [5,] Report Date:  2021-04-26 11:48:12                          
+##  [6,]                                                            
+##  [7,] Data Information:                                          
+##  [8,]    Number of cases/individuals  250                        
+##  [9,]    Number of items  9                                      
+## [10,]    Number of categories per item 4                         
+## [11,]    Number of dimensions:  3                                
+## [12,]                                                            
+## [13,] Model Specification:                                       
+## [14,]   Number of unique parameters 57                           
+## [15,]   Number of unique marginal effects:  27                   
+## [16,]   Number of unique category parameters (nu&#39;s or a&#39;s):  27  
+## [17,]   Number of unique association parameters (phis): 3        
+## [18,]                                                            
+## [19,] Convergence Information:                                   
+## [20,]   Number of iterations:  21                                
+## [21,]   Tolerence set tol 1e-06                                  
+## [22,]   Criterion  5.86059115903481e-07                          
+## [23,]                                                            
+## [24,] Model Fit Statistics:                                      
+## [25,]   Maximum log pseudo-likelihood function: -2327.63873770356
+## [26,]   AIC:   2270.63873770356                                  
+## [27,]   BIC:   4340.55420308898                                  
+## [28,]</code></pre>
+<p>Note that for the multi-dimensional model, the object ‘phi.mnlogit’ is no longer NULL for the GPCM and Nominal models. Stacked regression are required to get estimates of the <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters. Unlike the independence and Rasch models, the GPCM and Nominal models iteratively estimates the <span class="math inline">\(\sigma_{mm&#39;}\)</span> parameters.</p>
+<p>The matrix of association parameters (conditional correlation matrix) is in the object</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" title="1">n3<span class="op">$</span>Phi.mat</a></code></pre></div>
+<pre><code>##           [,1]      [,2]      [,3]
+## [1,] 1.0000000 0.1754632 0.2977876
+## [2,] 0.1754632 1.0000000 0.1934630
+## [3,] 0.2977876 0.1934630 1.0000000</code></pre>
+</div>
+<div id="example-42-items-n1000-m3" class="section level2">
+<h2>Example: 42 items, N=1000, M=3</h2>
+<p>The same basic set-up is needed regardless of the number of items. For models fit to the full dass data set we need</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" title="1"><span class="co"># the full data set</span></a>
+<a class="sourceLine" id="cb71-2" title="2">inData &lt;-<span class="st"> </span>dass</a>
+<a class="sourceLine" id="cb71-3" title="3"></a>
+<a class="sourceLine" id="cb71-4" title="4"><span class="co"># A (3 x 3) trait by trait adjacency matrix</span></a>
+<a class="sourceLine" id="cb71-5" title="5">inTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="dt">nrow=</span><span class="dv">3</span> ,<span class="dt">ncol=</span><span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb71-6" title="6"></a>
+<a class="sourceLine" id="cb71-7" title="7"><span class="co"># A (42 x 3) item by trait adjacency matrix</span></a>
+<a class="sourceLine" id="cb71-8" title="8">d &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),<span class="dt">nrow=</span><span class="dv">14</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb71-9" title="9">a &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>),<span class="dt">nrow=</span><span class="dv">13</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb71-10" title="10">s &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>),<span class="dt">nrow=</span><span class="dv">15</span>,<span class="dt">ncol=</span><span class="dv">3</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb71-11" title="11">das &lt;-<span class="st"> </span><span class="kw">list</span>(d, a, s)</a>
+<a class="sourceLine" id="cb71-12" title="12">inItemTraitAdj  &lt;-<span class="st"> </span><span class="kw">rbind</span>(das[[<span class="dv">1</span>]], das[[<span class="dv">2</span>]], das[[<span class="dv">3</span>]])</a></code></pre></div>
+<p>The ‘ple.lma’ and all other functions work in the same manner as shown in our small example.</p>
+<div id="computational-time" class="section level3">
+<h3>Computational Time</h3>
+<p>Larger numbers of items, more categories, and more cases will increase the computational time. In the table below are the user, system, and elapsed times in seconds for models fit to the dass data on my desktop (Intel i7, CPU 290 GHZ and 160.GB RAM) using defaults. On the left are times for the sub-set of the dass data (i.e., <span class="math inline">\(N=250\)</span>, <span class="math inline">\(I=9\)</span> and <span class="math inline">\(M=1\)</span>) and on the right are times for the full dass data set and most complex models (i.e., <span class="math inline">\(N=1000\)</span>, <span class="math inline">\(I=42\)</span>, <span class="math inline">\(M=3\)</span>). The independence log-linear model and Rasch models take the least amount of time and are fit fairly quickly. Even with the more model complex models and the full dass data set, the elapsed times is about 12 minutes.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>user</th>
+<th>system</th>
+<th>elapsed</th>
+<th>user</th>
+<th>system</th>
+<th>elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Independence</td>
+<td>0.30</td>
+<td>0.03</td>
+<td>0.34</td>
+<td>24.66</td>
+<td>2.35</td>
+<td>27.03</td>
+</tr>
+<tr class="even">
+<td>Rasch</td>
+<td>0.34</td>
+<td>0.00</td>
+<td>0.36</td>
+<td>30.58</td>
+<td>2.77</td>
+<td>33.34</td>
+</tr>
+<tr class="odd">
+<td>GPCM</td>
+<td>17.94</td>
+<td>0.08</td>
+<td>18.26</td>
+<td>541.18</td>
+<td>180.22</td>
+<td>721.50</td>
+</tr>
+<tr class="even">
+<td>Nominal</td>
+<td>17.67</td>
+<td>0.08</td>
+<td>17.91</td>
+<td>584.20</td>
+<td>183.86</td>
+<td>728.50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>The computational times for the GPCM and Nominal models can be sped up by using parameter estimates from simpler models as starting values. The estimated Phi.mat from the Rasch model can be used as starting values in the GPCM model. The parameter estimates from the GPCM model (i.e., <span class="math inline">\(\hat{a}_{im}x_j\)</span> and <span class="math inline">\(\hat{\phi}_{mm&#39;}\)</span>) can be used as starting values in the Nominal model. Additionally, tolerance can be decreased. Using this strategy and setting <span class="math inline">\(\mbox{tol}=1e-03\)</span>, the elapsed time for the GPCM dropped down from <span class="math inline">\(721.50\)</span> to <span class="math inline">\(443.36\)</span> and the time for the Nominal model dropped from <span class="math inline">\(728.50\)</span> to <span class="math inline">\(415.36\)</span>. Examining the convergence statistics and iterations plots for each parameter show that the parameters estimates essentially do not change after 5 to 6 iterations. If more iterations are needed or desired, the current parameters estimates can be used as starting values for additional iterations.</p>
+</div>
+</div>
+</div>
+<div id="example-dichotomous-items" class="section level1">
+<h1>Example: Dichotomous Items</h1>
+<p>All of the models (independence, rasch, gpcm and nominal) can be fit to data where the categorical variables only have two categories. For uni-dimensional models and dichotomous data, the ‘rasch’ model type fits the one parameter logistic (’1pl&quot;). The one parameter for each item is <span class="math inline">\(\lambda_{i1}\)</span>.</p>
+<p>For uni-dimensional GPCM and Nominal models, the LMA corresponds to a two-parameter logistic model (‘2pl’). The two parameters are <span class="math inline">\(\lambda_{i1}\)</span> and <span class="math inline">\(\nu_{i1}\)</span> (or <span class="math inline">\(a_{i}\)</span>) for each item. To illustrate the equivalency, we use the vocabulary data and fit the 2pl model as a GPCM and as a Nominal model.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" title="1"><span class="kw">data</span>(vocab)</a>
+<a class="sourceLine" id="cb72-2" title="2">inItemTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow=</span><span class="kw">ncol</span>(vocab), <span class="dt">ncol=</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb72-3" title="3">inTraitAdj &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow=</span><span class="dv">1</span>, <span class="dt">ncol=</span><span class="dv">1</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" title="1"><span class="co">#--- 2 pl as a gpcm model</span></a>
+<a class="sourceLine" id="cb73-2" title="2">  g<span class="fl">.2</span>pl &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(<span class="dt">inData=</span>vocab, <span class="dt">model.type=</span><span class="st">&quot;gpcm&quot;</span>, inItemTraitAdj, inTraitAdj, <span class="dt">tol=</span><span class="fl">1e-04</span>)</a></code></pre></div>
+<pre><code>## Basic set up is complete</code></pre>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1"><span class="co">#--- 2 pl as a nominal model</span></a>
+<a class="sourceLine" id="cb75-2" title="2">  n<span class="fl">.2</span>pl &lt;-<span class="st"> </span><span class="kw">ple.lma</span>(<span class="dt">inData=</span>vocab, <span class="dt">model.type=</span><span class="st">&quot;nominal&quot;</span>, inItemTraitAdj, inTraitAdj, <span class="dt">tol=</span><span class="fl">1e-04</span>)</a></code></pre></div>
+<pre><code>## Basic set up is complete</code></pre>
+<p>The two models have the same fit (i.e., the mlpl for both models equals -5917.6195), and the estimated parameter are also the same</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" title="1">g<span class="fl">.2</span>pl<span class="op">$</span>estimates</a></code></pre></div>
+<pre><code>##         loglike     lamba1     lamba2         a         x1        x2
+## wordA -622.3013 -0.4787346  0.4787346 0.3127587 -0.7071068 0.7071068
+## wordB -360.5954 -0.8639664  0.8639664 0.8740199 -0.7071068 0.7071068
+## wordC -636.7369  1.0243932 -1.0243932 0.3076158 -0.7071068 0.7071068
+## wordD -176.6814 -1.6742181  1.6742181 0.8598004 -0.7071068 0.7071068
+## wordE -538.4564 -0.3814116  0.3814116 0.6742127 -0.7071068 0.7071068
+## wordF -596.0831 -0.3351989  0.3351989 0.5315539 -0.7071068 0.7071068
+## wordG -791.4166  0.6189210 -0.6189210 0.2288819 -0.7071068 0.7071068
+## wordH -808.5806  0.6219071 -0.6219071 0.3400109 -0.7071068 0.7071068
+## wordI -707.4387 -0.3105613  0.3105613 0.3006976 -0.7071068 0.7071068
+## wordJ -679.3291  1.4262671 -1.4262671 0.7768446 -0.7071068 0.7071068</code></pre>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" title="1">n<span class="fl">.2</span>pl<span class="op">$</span>estimates</a></code></pre></div>
+<pre><code>##         loglike    lambda1    lambda2        nu1       nu2
+## wordA -622.3013 -0.4787346  0.4787346 -0.2211538 0.2211538
+## wordB -360.5954 -0.8639664  0.8639664 -0.6180254 0.6180254
+## wordC -636.7369  1.0243932 -1.0243932 -0.2175172 0.2175172
+## wordD -176.6814 -1.6742181  1.6742181 -0.6079707 0.6079707
+## wordE -538.4564 -0.3814116  0.3814116 -0.4767404 0.4767404
+## wordF -596.0831 -0.3351989  0.3351989 -0.3758654 0.3758654
+## wordG -791.4166  0.6189210 -0.6189210 -0.1618439 0.1618439
+## wordH -808.5806  0.6219071 -0.6219071 -0.2404240 0.2404240
+## wordI -707.4387 -0.3105613  0.3105613 -0.2126253 0.2126253
+## wordJ -679.3291  1.4262670 -1.4262670 -0.5493121 0.5493121</code></pre>
+<p>The <span class="math inline">\(\hat{\lambda}_{ij}\)</span>’s are identical. To show the equivalence for the representation of the interaction, the GPCM category scores <span class="math inline">\(x_j\)</span> need to be multiplied by the weights <span class="math inline">\(\hat{a}_{i}\)</span>; that is,</p>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" title="1">g<span class="fl">.2</span>pl<span class="op">$</span>estimates[, <span class="dv">4</span>] <span class="op">*</span><span class="st"> </span>g<span class="fl">.2</span>pl<span class="op">$</span>estimates[, <span class="dv">5</span><span class="op">:</span><span class="dv">6</span>]</a></code></pre></div>
+<pre><code>##               x1        x2
+## wordA -0.2211538 0.2211538
+## wordB -0.6180254 0.6180254
+## wordC -0.2175172 0.2175172
+## wordD -0.6079707 0.6079707
+## wordE -0.4767404 0.4767404
+## wordF -0.3758654 0.3758654
+## wordG -0.1618439 0.1618439
+## wordH -0.2404240 0.2404240
+## wordI -0.2126253 0.2126253
+## wordJ -0.5493121 0.5493121</code></pre>
+<p>which are equal to the <span class="math inline">\(\hat{\nu}_{ij}\)</span>’s from the Nominal model.</p>
+</div>
+<div id="other-uses-and-future-releases" class="section level1">
+<h1>Other Uses and Future Releases</h1>
+<p>All the functions used by ‘pleLMA’ are available as source. The algorithm is modular and can be “canabilzied” for specific uses or alternative models. For example, in a replication study, the problem can be set up using the ‘set.up’ function once, and then use the “fit.rasch”, “fit.gpcm” or “fit.nominal”. In a replication, only the response vector in the Master data frame needs to be changed (i.e., do not have to re-create the master data frame) so a loop would go around the function that fits the model. This can be sped up even further by pulling the code out of the functions and only including what is absolutely necessary (and use parameter estimates from the previous model fit). This same strategy can be used to perform jackknife or bootstrap to get standard errors for parameters. Alternatively, functions can be pulled and modified to allow some items to be fit by say a GPCM and others by the Nominal model.</p>
+<p>In future versions, options for fitting different models to items will be added, along with more complex latent structures, multiple methods for estimating standard errors, dealing with different numbers of categories per item, and the ability to include collateral information. Even though all of these variations are planned, the current version of the pleLMA package opens up more wide spread use of association models for categorical data.</p>
+</div>
+<div id="appendix" class="section level1">
+<h1>Appendix</h1>
+<p>All of the objects potentially created by fitting a model to data are listed and described in the following table. Whether an object is NULL depends on the version of the pseudo-likelihood alogirthm that is used, which is determined by the model that was specified. Objects produced by versions of the algorithm are indicated by a check mark and objects that are null are blanks.</p>
+<table>
+<colgroup>
+<col width="13%"></col>
+<col width="58%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Object</th>
+<th>Description</th>
+<th>Algorithm I</th>
+<th>Algorithm II</th>
+<th>Algorithm III</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>model.type</td>
+<td>model type fit to data</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>TraitByTrait</td>
+<td>trait <span class="math inline">\(\times\)</span> trait adjacency matrix</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>ItemByTrait</td>
+<td>item <span class="math inline">\(\times\)</span> trait adjacency</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>item.by.trait</td>
+<td>vector indicating the trait that items are directly related to</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>ItemNames</td>
+<td>names of items used in the data set</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>PhiNames</td>
+<td>names of association parametr (i.e., <span class="math inline">\(\sigma_{mm&#39;}\)</span>s) in stacked data and formula</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>formula.item</td>
+<td>formula for item regressions</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>formula.phi</td>
+<td>formula for stacked regressions</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>npersons</td>
+<td>number of individuals or cases</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>nitems</td>
+<td>number of items</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>ncat</td>
+<td>number of categories per item</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>nless</td>
+<td>ncat - 1 = number of non-redundant <span class="math inline">\(\hat{\lambda}_{ij}\)</span> and <span class="math inline">\(\hat{\nu}_{ijm}\)</span> (or <span class="math inline">\(\hat{a}_{im}\)</span>) per item</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>Maxnphi</td>
+<td>max number of <span class="math inline">\(\sigma_{mm&#39;}\)</span>s estimated (&quot;phi<span class="math inline">\(\sigma\)</span>)</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>ntraits</td>
+<td>number of unobserved traits</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>starting.sv</td>
+<td>starting category scale value for Nominal or fixed scores for rasch and gpcm models</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>tol</td>
+<td>convergence criterion (default <span class="math inline">\(=1e-06\)</span>)</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>criterion</td>
+<td>max absolute difference between items’ log likelihoods on last 2 iterations</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>item.log</td>
+<td>log file of <span class="math inline">\(\hat{\nu}_{ijm}\)</span>s (or <span class="math inline">\(a_{im}\)</span>) and <span class="math inline">\(\hat{\lambda}_{ij}\)</span></td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>phi.log</td>
+<td>log file of <span class="math inline">\(\hat{\phi}_{mm&#39;}\)</span> and <span class="math inline">\(\hat{\lambda}_{ij}\)</span></td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>estimates</td>
+<td>item by estimated item parameters and log(Likelihood)</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>Phi.mat</td>
+<td>estimated <span class="math inline">\(\mathbf{\Sigma}\)</span>s (matrix of association parameters)</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>item.mnlogit</td>
+<td>list of ‘mnlogit’ output from item regressions after convergence</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>phi.mnlogit</td>
+<td>‘mnlogit’ output for <span class="math inline">\(\sigma_{mm&#39;}\)</span>s from stacked regression after convergence</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>mlpl.item</td>
+<td>value of the maximum log pseudo-likelihood function from item regressions</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>mlpl.phi</td>
+<td>value of the maximum log pseudo-likelihood function from stacked regression</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="even">
+<td>AIC</td>
+<td>Akaike information criteria (smaller is better)</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr class="odd">
+<td>BIC</td>
+<td>Bayesian information criteria (smaller is better)</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-AndersonMariaIrini2021">
+<p>Anderson, Carolyn J., Maria Kateri, and Irini Moustaki. 2021. “Log-Linear and Log-Multiplicative Association Models for Categorical Data.” <em>Under Review</em>.</p>
+</div>
+<div id="ref-AndersonLiVermunt2007">
+<p>Anderson, Carolyn J., Zhusan Li, and Jeoren J. K. Vermunt. 2007. “Estimation of Models in a Rasch Family for Polytomous Items and Multiple Latent Variables.” <em>Journal of Statistical Software</em>. <a href="https://doi.org/10.18637/jss.v020.i06">https://doi.org/10.18637/jss.v020.i06</a>.</p>
+</div>
+<div id="ref-AndersonVerkuilenPeyton2010">
+<p>Anderson, Carolyn J., Jay V. Verkuilen, and Buddy Peyton. 2010. “Modeling Polytomous Item Responses Using Simultaneously Estimated Multinomial Logistic Regression Models.” <em>Journal of Educational and Behavioral Statistics</em> 35: 422–52. <a href="https://doi.org/10.3102/1076998609353117">https://doi.org/10.3102/1076998609353117</a>.</p>
+</div>
+<div id="ref-AndersonVermunt2000">
+<p>Anderson, Carolyn J., and Jeroen J. K. Vermunt. 2000. “Log-Multiplicative Association Models as Latent Variable Models for Nominal and/or Ordinal Data.” <em>Sociological Methodology</em> 30: 81–121. <a href="https://doi.org/10.1111/0081-1750.00076">https://doi.org/10.1111/0081-1750.00076</a>.</p>
+</div>
+<div id="ref-AndersonYu2007">
+<p>Anderson, Carolyn J., and Hsiu-Ting Yu. 2007. “Log-Multiplicative Association Models as Item Response Models.” <em>Psychometrika</em> 72: 5–23. <a href="https://doi.org/10.1007/s11336-005-1419-2">https://doi.org/10.1007/s11336-005-1419-2</a>.</p>
+</div>
+<div id="ref-ArnoldStrauss1991">
+<p>Arnold, Barry C., and David Straus. 1991. “Pseudolikelihood Estimation: Some Examples.” <em>The Indian Journal of Statistics</em> 53: 233–43.</p>
+</div>
+<div id="ref-Becker1989">
+<p>Becker, Mark. 1989. “On the Bivariate Normal Distribution and Association Models for Ordinal Categorical Data.” <em>Statistics &amp; Probability Letters</em> 8: 435–40. <a href="https://doi.org/10.1016/0167-7152(89)90023-0">https://doi.org/10.1016/0167-7152(89)90023-0</a>.</p>
+</div>
+<div id="ref-BouchetTurneretal2020">
+<p>Bouchet-Valat, Milan, Heather Turner, Michael Friendly, Jim Lemon, and Cabor Csardi. 2020. <em>Package “Logmult”</em>. <a href="https://github.com/nalimilan/logmult">https://github.com/nalimilan/logmult</a>.</p>
+</div>
+<div id="ref-Chenetal2018">
+<p>Chen, Yunxio, Xiaoou Li, Jingchen Liu, and Zhiliang Ying. 2018. “Robust Measurement via a Fused Latent Variable and Graphical Item Response Theory Model.” <em>Psychometrika</em> 85: 538–62. <a href="https://doi.org/10.1007/s11336-018-9610-4">https://doi.org/10.1007/s11336-018-9610-4</a>.</p>
+</div>
+<div id="ref-Geysetal1999">
+<p>Geys, Helena, Geert Molenberghs, and Louise M. Ryan. 1999. “Pseudolikelihood Modeling in Multivariate Outcomes in Developmental Toxicology.” <em>Journal of the American Statistical Association</em> 94: 734–45. <a href="https://doi.org/10.2307/2669986">https://doi.org/10.2307/2669986</a>.</p>
+</div>
+<div id="ref-Goodman1981">
+<p>Goodman, Leo L. 1981. “Association Models and the Bivariate Normal for Contingency Tables With Ordered Categories.” <em>Biometrika</em> 68: 347–55. <a href="https://doi.org/10.1093/biomet/68.2.347">https://doi.org/10.1093/biomet/68.2.347</a>.</p>
+</div>
+<div id="ref-Hasanetal2016">
+<p>Hasan, Asad, Zhiyu Wang, and Alireza S. Mahani. 2016. “Fast Estimation of Multinomial Logit Models: R Package mnlogit.” <em>Journal of Statistical Software</em> 75: 1–24. <a href="https://doi.org/10.18637/jss.v075.i03">https://doi.org/10.18637/jss.v075.i03</a>.</p>
+</div>
+<div id="ref-Hessen2012">
+<p>Hessen, David J. 2012. “Fitting and Testing Conditional Multinomial Partial Credit Models.” <em>Psychometrika</em> 77: 693–709. <a href="https://doi.org/10.1007/s11336-012-9277-1">https://doi.org/10.1007/s11336-012-9277-1</a>.</p>
+</div>
+<div id="ref-Holland1990">
+<p>Holland, Paul W. 1990. “The Dutch Identity: A New Tool for the Study of Item Response Models.” <em>Psychometrika</em> 55: 5–18. <a href="https://doi.org/10.1007/BF02294739">https://doi.org/10.1007/BF02294739</a>.</p>
+</div>
+<div id="ref-Kruis+Maris2016">
+<p>Kruis, Joost, and Gunter Maris. 2016. “Three Respresentations of the Ising Model.” <em>Scienftific Reports</em> 6: 1–10. <a href="https://doi.org/10.1038/srep34175">https://doi.org/10.1038/srep34175</a>.</p>
+</div>
+<div id="ref-Marsmanetal2018">
+<p>Marsman, M., D. Borsboom, J. Kruis, S. Epskamp, R. van Bork, L. J. Waldorp, H. L.J. van der Maas, and G. Maris. 2018. “An Introduction to Network Psychometrics: Relating Ising Network Models to Item Response Theory Models.” <em>Multivariate Behavioral Research</em> 53: 15–35. <a href="https://doi.org/10.1080/00273171.2017.1379379">https://doi.org/10.1080/00273171.2017.1379379</a>.</p>
+</div>
+<div id="ref-Paek2016">
+<p>Paek, Youngshil. 2016. “Pseudo-Likelihood Estimation of Multidimensional Item Response Theory Model.” PhD thesis, University of Illinois, Urbana-Champaign.</p>
+</div>
+<div id="ref-PaekAnderson2017">
+<p>Paek, Youngshil, and Carolyn J. Anderson. 2017. “Pseudo-Likelihood Estimation of Multidimensional Response Models: Polytomous and Dichotomous Items.” In <em>Quantitative Psychology — the 81st Annual Meeting of the Psychometric Society</em>, edited by Andries van der Ark, Marie Wiberg, Steven A. Culpepper, Jeffrey A. Douglas, and Wen-Chung Wang, 21–30. NYC: Springer. <a href="https://doi.org/10.1007/978-3-319-56294-0_3">https://doi.org/10.1007/978-3-319-56294-0_3</a>.</p>
+</div>
+<div id="ref-RomSarkar1990">
+<p>Rom, Dror, and Sanat K. Sarkar. 1990. “Approximating Probability Integrals of Multivariate Normal Using Association Models.” <em>Journal of Statistical Computation and Simulation</em> 35 (1-2): 109–19. <a href="https://doi.org/10.1080/00949659008811237">https://doi.org/10.1080/00949659008811237</a>.</p>
+</div>
+<div id="ref-deRooij2007">
+<p>Rooij, Mark de. 2007. “The Analysis of Change, Netwon’s Law of Gravity and Association Models.” <em>Journal of the Royal Statistical Society: Statistics in Society, Series A</em> 171: 137–57. <a href="https://doi.org/10.1111/j.1467-985X.2007.00498.x">https://doi.org/10.1111/j.1467-985X.2007.00498.x</a>.</p>
+</div>
+<div id="ref-deRooij2009">
+<p>———. 2009. “Ideal Point Discriminant Analysis Revisited with a Special Emphasis on Visualization.” <em>Psychometrika</em> 74: 317–30. <a href="https://doi.org/10.1007/s11336-008-9105-9">https://doi.org/10.1007/s11336-008-9105-9</a>.</p>
+</div>
+<div id="ref-deRooijHeiser2005">
+<p>Rooij, Mark de, and Willem Heiser. 2005. “Graphical Representations and Odds Ratios in a Distance-Association Model for the Analysis of Cross-Classified Data.” <em>Psychometrika</em> 70: 99–122. <a href="https://doi.org/10.1007/s11336-000-0848-1">https://doi.org/10.1007/s11336-000-0848-1</a>.</p>
+</div>
+<div id="ref-TurnerFirth2020">
+<p>Turner, Heather, and David Firth. 2020. <em>Generalized Nonlinear Models in R: An Overview of the Gnm Package</em>. <a href="https://cran.r-project.org/package=gnm">https://cran.r-project.org/package=gnm</a>.</p>
+</div>
+<div id="ref-Wang1987">
+<p>Wang, Yuchung J. 1987. “The Probability Intergrals of Bivariate Normal Distributions: A Contingency Table Approach.” <em>Biometrika</em> 74: 185–90. <a href="https://doi.org/10.1093/biomet/74.1.185">https://doi.org/10.1093/biomet/74.1.185</a>.</p>
+</div>
+<div id="ref-Wang1997">
+<p>———. 1997. “Multivariate Normal Integrals and Contingency Tables with Ordered Categories.” <em>Psychometrika</em> 62: 267–84. <a href="https://doi.org/10.1007/BF02295280">https://doi.org/10.1007/BF02295280</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

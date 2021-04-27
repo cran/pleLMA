@@ -1,0 +1,286 @@
+---
+title: "Vignette for the pleLMA Package"
+author: "Carolyn J. Anderson"
+date: "1/4/2021"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pleLMA_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+This document describes how to use the pleLMA package.  Log-Multiplicative Association (LMA) Models are generalizations of the RC(M) association model for multivariate categorical data. The LMA models are structured log-linear models with two-way interactions.  A multiplicative structure is imposed on the (matrices) is interaction parameters.  LMA models have been derived from a number of different starting points (e.g., statistical graphical models, (multidimensional) item response theory models, and others).  Maximum likelihood estimation for small cross-classifications can be fit by the gnm package and for two-tables the logmult package (a wrapper function for gnm); however, MLE becomes prohibitive for moderate to large number of variables.  This package uses pseudo-likelihood estimation that removes limitations on the number of variables and number of categories per variable.  The LMA models that can be fit by the pleLMA package are log-linear model of independence (a baseline model), log-linear by linear models (i.e., models in the Rasch family), generalized partial credit models (GPCM), and the Nominal response model.  For more details see the Chapter  "Log-linear and Log-Multiplicative Association Models for Categorical Data" by Carolyn J. Anderson, Maria Kateri, and Irini Moustaki (2021), and references therein.  All examples use the DASS data included in the pleLMA package for 9 four category items and the code to fit examples found in the chapter by Anderson, Kateri & Moustaki for 42 items is given but not run.
+
+Let $\mathbf{Y}$ be a $(I\times 1)$ vector of random categorical variables and $\mathbf{y}$ is it's realization where $y={y_i}$. Both $i$ and $k$ will denote variables and $j_i$ and $\ell_k$ will denote categories of variables; however, to keep the notation simpler the subscripts on categories will be suppressed as well as indices for particular cases (individuals, subjects, etc.).  The most general LMA for the probability that $\mathbf{Y}=\mathbf{y}$ is
+$$\log (P(\mathbf{Y}=\mathbf{y})) = \lambda + \sum_{i=1} \lambda_{ij} + \sum_i \sum_{k<i} \sum_m \sum_{m'\ne m} \sigma_{mm'}\nu_{ijm}\nu_{k\ell m'}, $$
+where $\lambda$ ensures that probabilities sum to 1, $\lambda_{ij}$ is the marginal effect parameter for category $j$ of variable $i$, $\sigma_{mm'}$ is the association parameter for dimensions $m$ and $m'$, and $\nu_{im}$ and $\nu_{k\ell m}$ are category scale values for items $i$ and $k$ on dimensions $m$ and $m'$, respectively.  The association parameters measure the strength of the association between items and the category scale values measure the strength.  
+
+As latent variable model (e.g., graphical model with observed discrete variables and unobserved continuous ones), $m$ is the index for a latent variable.  The assumptions required that yield the LMA from a graphical or latent variable (e.g., (M)IRT) model are that $\mathbf{Y}$ follows a multinomial distribution, the categorical variables are independent conditionally on the latent variables, and that the latent variables follow a homogeneous conditional multivariate normal distribution; that is, $\mathbf{\Theta} \sim MVN(\mathbf{\mu_y},\mathbf{\Sigma})$.  There are no latent variables in the LMA, but the parameters for the latent variables distribution. The elements of $\mathbf{\Sigma}$ are the $\sigma_{mm'}$ and the conditional mean equal
+$$E(\theta_m|{\mathbf{y}}) = \sum_m  \sigma_{mm} \left(\sum_i \nu_{ijm}\right) + \sum_{m'}\sigma_{mm'} \left(\sum_i \nu_{ijm'}\right).$$
+
+The LMA above is very general and represents the model where each categorical variable "loads" on each of the latent ones.  This model can be fit with sufficient identification constraints, but the current version of the pleLMA package only fits models where each categorical variable loads on one and only one latent variable. 
+
+Important for the pseudo-likelihood algorithm are the conditional distributions of probability of a response on one item given values on all the other.  The algorithm maximizes the product of the log-likelihoods for all the conditionals.  In short, the model that pleLMA works with is 
+$$ P(Y_i=j|\mathbf{y_{-i}}) = \frac{\exp (\lambda_{ij} + \nu_{ijm} \sum_{k\ne i}\sum_{m'} \sigma_{mm'}\nu_{k\ell m'})} { \sum_h \exp(\lambda_{ih} + \nu_{ihm} \sum_{k\ne i}\sum_{m'} \sigma_{mm'}\nu_{k\ell m'})},$$
+where $\mathbf{y_{-i}}$ are responses to items excluding item $i$.  For more details about the algorithm see Anderson, Kateri and Moustaki chapter and references therein.
+
+Identification constraints used when estimating the model are $\sum_j\lambda_{ij}= 0$, $\sum_j \nu_{ijm}= 0$.  Scaling constraints are required but are slightly different for different models.  These are given below.
+
+# The Package
+
+The pleLMA package uses base R for data manipulation and plotting results.  The current package uses the mnlogit package to fit the conditional multinomial or discrete choice model to the data.  The package was built under version 4.0.0 of R, but should work for R versions 3 and beyond.  We expect that given the use of base R, the package will be forward compatible with future releases of R. 
+
+The function ple.lma is the main function that takes input data and model specifications, sets up constants and objects needed to fit the models, fits the model, and outputs results.  Auxiliary functions are available to aid in examining the result.  The package is modular in nature and all functions can be run outside of the ple.lma function provided that the input to the function is provided.  
+
+
+# Set Up
+The pleLMA package needs to be installed and loaded.
+
+## Install package
+
+The package maybe installed from source or from pleLMA_0.1.0.tar.gz.  
+
+To install from source, 
+```{r, echo=TRUE, eval=FALSE}
+# Creates html documentation to use with ?  or help()
+devtools::document("D:/pleLMA/R")
+# Installs the package
+devtools::install("D:/pleLMA/R")
+# uses MixTex to create pdf manual
+devtools::build_manual(pkg = "pleLMA", path = NULL)
+```
+
+The alternative is a bit easier, especially if using Rstudio.  To install the compiled version,
+  1.  Open Packages window
+  2.  Click on Install
+  3.  In the install window, select Package from Repository is item zip or ta.gz and enter directory where the package lives.
+  3.  Give the package name "pleLMA"
+  4.  Click "install"
+
+
+## Load library
+
+```{r}
+library(mnlogit)
+library(pleLMA)
+```
+
+There is online (html) documentation for the package and all of its functions, as well as a pdf manual. In Rstudio, click on the package name pleLMA in the "Packages" window.   
+
+
+## The Data
+
+The data included with the package is DASS data (retrieved July, 2020 from OpenPsychometrics.org), which consist of responses collected during the period of 2017 -- 2019 to 42 items, and of the 38,776 respondents, only a random sample of 1,000 is included in the package.  The items were presented online to respondents in a random order.  The items included in DASS are from scales designed to measure depression (d1--d14),  anxiety (a1--a13), and stress (s1--s15). 
+
+
+```{r}
+data(dass)
+```
+The data should be in a data frame where rows are individuals or cases and columns are different variables.  The row can be thought of as response patterns.  The categories for each variable should run from 1 to the number of categories.  In this version of the package, the number of categories per variables should all the same.  
+
+Information the response scale (i.e., categories of the items) and the items themselves
+```{r, echo=FALSE, eval=FALSE}
+?dass
+```
+
+# Example of $I=9$ items for $N=250$ cases
+
+The dass data for this example consists of a subset N=250 cases of columns with 3 items from each of three scale designed to measure depression (d1-d3), anxiety (a1-a3), and stress (s1-s3). The Input data frame is call inData are created by
+```{r}
+data(dass)
+items.to.use <- c("d1","d2","d3","a1","a2","a3","s1","s2","s3")
+inData <- dass[1:250,(items.to.use)]
+head(inData)
+```
+
+
+## Uni-dimensional models, $M=1$
+
+Uni-dimensional model are those where there is only one latent trait.  In graphical modeling terms, each categorical variable is directly connected to the single (latent) continuous variable.     
+  
+### Input
+There more input are required to fully specify a model and will differ depending on the specific structure and model desired. "InTraitAdj" is an $M\times M)$ trait by trait adjacency matrix where a 1 indicates that traits are correlated and 0 otherwise. For uni-dimensional model this is simply 
+```{r}
+inTraitAdj <- matrix(1, nrow=1 ,ncol=1)
+inTraitAdj
+```
+
+
+The second required input is an Item by Trait adjacency matrix, which for simple uni-dimensional models is a vector of ones, 
+```{r}
+inItemTraitAdj <- matrix(1, nrow=ncol(inData), ncol=1)
+inItemTraitAdj
+```
+
+The final input is to specify the model type where possible types are 
+
+*   "ind" for the independence log-linear model where only $\lambda$ and $\lambda_{ij}$ are estimated.
+*   "rasch" for a model in the Rasch family (log linear by linear model) where category scores are fixed. This is a multivariate generalization of the log-linear by linear model.  For this model, restrictions are placed on the category scale values; namely, let $x_j$ be equally spaced numbers, $$\nu_{ijm} = x_j.$$ 
+*   "gpcm" for a generalization partial credit model where category scores are fixed but weight (or slope) of scores differs over items.  The restriction on the category scale values are $$\nu_{ijm} = \alpha_{im}x_j.$$
+*   "nominal" model places on restrictions on the category scale values.
+
+For the Rasch model, elements of $\mathbf{\Sigma}$ are all estimated; however, the GPCM and Nominal models require one scaling constraint per latent variable (i.e., $m$).  When fitting the model to data, we used the identification constraint that $\sigma_{mm}=$ for all $m$, hence we estimate a conditional correlation matrix.  An alternative constraint where for one item per $m$ is constrained such that $\sum_{j} \nu_{ijm}^2=1$. An auxiliary function is provided to change the scaling constraint after the model has been fit.  With the alternative identification constraints, the strength and structure are more apparent.
+ 
+The $x_j$'s need not be equally spaced, and the pleLMA package allows the user to set these number of desired values.  The package defaults are equally spaced number centered at 0. 
+
+ 
+The minimal commands to fit each type of model are 
+```{r}
+ind <- ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="independence")
+r1 <-  ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="rasch")
+g1 <-  ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="gpcm")
+n1 <-  ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="nominal")
+```
+
+For each model, a message it printed to the console indicating where basic errors were found in the input, and if there are errors, the type of error is indicated.  If not errors are found the function proceeds to set up various objects that are used to fit the model.  For the independence and Rasch models, only a single conditional multinomial logit model (i.e., discrete choice) is fit to a ''stacked'' data set.  For the GPCM and Nominal models, parameter estimates for each item are estimated using current values of category scale values for all the other items.  This process is iterated and the value of the criterion is printed to the console after a complete cycle of up-dating scale values for all items. For both the GPCM and Nominal model required 13 and 15, respectively iterations.  
+
+
+The other option, "starting.sv", is an (I x J) matrix of starting scale values (i.e., the $\nu_{ijm}$s) for nominal models and are fixed category scores (i.e., $x_j$s) for Rasch and GPCMs.  By default the program sets these to equally spaced values centered around 0.  If we want to use alternative values, we can use this option.  For example, instead of equally spaced values for a GPCM model, we may decide on 
+```{r}
+start <- matrix(c(-2,-1.5,1,2), nrow=9, ncol=4, byrow=TRUE)
+g1b <- ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="gpcm", starting.sv=start)
+```
+Which model is better, we take a quick look at the value on the maximum of the log pseudo-likelihood function (MLPL) using the commands
+```{r}
+g1$mlpl.item
+g1b$mlpl.item
+```
+Note that the maximum of the log of the pseudo-likelihood (MLPL) equals -2522.89 for the model with non-equally spaces scores and -2427.44 for the model with equally spaced category scores. Since the equally spaced scores yield a larger value of the MLPL, it is the better fitting model.
+
+
+### Output
+The output differs depending on model fit and some objects will be NULL, as well as whether the model is uni- or multi-dimensional.  For a quick way to see what's non-NULL and NULL,
+```{r}
+summary(n1)
+```
+
+To get some of this information in a quick snap shot, the following function yields information about the model specifications, it's convergence, and global fit statistics:
+```{r}
+summaryModel(n1)
+```
+
+In addition to summary information, the parameter estimates can be obtained for independence and model from the Rasch family by entering
+```{r, echo=TRUE, eval=FALSE}
+summary(i1$phi.mnlogit)
+summary(r1$phi.mnlogit)
+```
+
+The package mnlogit is used to fit the model to either the stacked or item level data.  These commands return the output produced by mnlogit.  They are from fitting models to stacked data.  The prefix is "phi", which is the association parameter and is estimated by stacked regressions (as well as marginal effects).  The phi parameters are the variances and covariances of the continuous variables conditional response parameters (i.e., cell of cross-classification.)
+
+To obtain the parameter estimates for the GPCM and Nominal model, they have been tabled in the object "estimates", and contain for the nominal model
+```{r}
+n1$estimates
+```
+The rows correspond to items and the columns the parameter estimates. The "lam"s are the marginal effects for categories 1 through 4 and the "nu"s are the category scale values  The first column contains the values of the log-likelihood from using MLE to fit each item's (conditional on the rest) data.  
+
+For the GPCM, the object estimates includes the $x_j$'s when the model was fit,
+```{r}
+g1$estimates
+```
+Again the first column at log-likelihoods for each item.  The columns parameter estimates for $\lambda_{ij}$s and $\alpha$ (labeled "a") and the X's are the fixed category scores.  The alpha or "a" parameters are the slopes for each item.  In model g0, these were generated by the ple.lma function.
+
+## Auxiliary functions
+
+In further consider the convergence we can look at the log files and the convergence statistics for all parameters.  For iterations (log file), we can print the value of the parameters for each iteration.  The object "n1$item.log" is a list where the 3rd dimension is the item. The history of iterations for item 1 is  
+```{r, eval=FALSE}
+n1$item.log[[1]]
+```
+or we can plot them using the function
+```{r, eval=FALSE }
+iterationPlot(history=n1$item.log, n1$nitems, n1$ncat, n1$nless, n1$ItemNames)
+```
+
+If you run the above command you will that algorithm gets very close to the final values in about 5 iterations, but continues on to meet the more stringent given by "tol".
+
+
+Another view of how well the algorithm converged, we can look at the differences between values from the last two iterations, which is given for the log-likelihoods and all item parameters by the function
+```{r}
+convergence.stats(n1$item.log, n1$nitems, n1$nless)
+```
+Even though tol$=1e-06$, the differences for the item parameters range from around $1.7e-09$ to $2.7e-13$, all very small.  For the GPCM model, the command is 
+```{r, eval=FALSE}
+convergenceGPCM(g1$item.log, g1$nitems, g1$ncat, g1$nless, g1$LambdaNames)
+```
+
+For nominal model, the function "scalingPlot" graphs the scale values by integers and overlays a linear regression line.  These can be used to determine the order of categories and whether a linear restriction could be imposed on them, such as with the simpler GPCM.  The plots also convey how strongly related the items are to the latent trait.  To produce these plots
+```{r, eval=FALSE}
+oplelma <- n1
+scalingPlot(oplelma)
+```
+
+If you run this command, you will notice that for the variables d2 and a3, the scale value close to linear; whereas, the others deviate from linearity to varying degrees.  The items a2, s1 and s2 have the steeper slopes, which indicate that these two items are more strongly related to the latent variable than the others.
+
+To fit the models, we needed to impose identification constraints, which for the GPCM and Nominal models we set the conditional variances equal to 1.  However, we can change this such that a scaling constraint is put on one item (for each latent variable) and estimate the phis (i.e., $\sigma$'s).  This teases apart the strength and structure of the relationships between items and the latent trait.  One item can be select and is indicated using a vector anchor.  To do the rescaling using item d1,
+```{r}
+anchor <- matrix(0, nrow=1, ncol=9)
+anchor[1,1] <- 1
+    
+rescale <- ScaleItem(n1$item.log, Phi.mat=n1$Phi.mat, anchor=anchor, n1$item.by.trait, nitems=n1$nitems, nless=n1$nless, ncat=n1$ncat, ntraits=n1$ntraits, ItemNames=n1$ItemNames)
+```
+
+If the log-multiplicative models are being used to for measurement, then we can compute the estimate on the latent variable from the item category scale values and conditional variances/covariances.  This function will compute the values
+```{r}
+theta.n1 <- theta.estimates(n1, inData, scores=n1$estimates)
+```
+
+## Multi-dimensional models
+
+
+Since the items of dass are designed to assess three difference constructs, we fit a 3-dimensional model and allow the latent variables to be conditional correlated (i.e., within response pattern).  We only need to change inTraitAdj and inItemTraitAdj to fit these models.  For the Trait by Trait adjacency matrix,
+```{r}
+inTraitAdj <- matrix(1, nrow=3 ,ncol=3)
+inTraitAdj
+```
+The ones in the off-diagonal indicate that latent variables are to be conditionally correlated.  For the Item by Trait adjacency matrix,
+```{r}
+d <- matrix(c(1, 0, 0),nrow=3,ncol=3,byrow=TRUE)
+a <- matrix(c(0, 1, 0),nrow=3,ncol=3,byrow=TRUE)
+s <- matrix(c(0, 0, 1),nrow=3,ncol=3,byrow=TRUE)
+das <- list(d, a, s)
+inItemTraitAdj  <- rbind(das[[1]], das[[2]], das[[3]])
+inItemTraitAdj
+```
+The command to fit the models is the same, i.e., For the nominal model
+```{r}
+n3 <-  ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="nominal")
+```
+The same evaluation and post fitting functions can be used.  Note that for the multi-dimensional model, that for the GPCM and Nominal models the object phi.mnlogit is no longer NULL. Stacked regression are required to get estimates of the $\sigma_{mm'}$ parameters.  The iteration log of estimates for the association parameters can also be used in function "iterationPlot". 
+
+The matrix of association parameters is in the object 
+```{r}
+n1$Phi.mat
+```
+
+# Example:  42 items, N=1000, and M=3
+
+The same basic set-up is needed for 42 items.  For models fit to the larger data set we need
+```{r}
+# the full data set
+inData <- dass
+
+# A (3 x 3) trait by trait adjacency matrix
+inTraitAdj <- matrix(c(1,1,1, 1,1,1, 1,1,1), nrow=3 ,ncol=3)
+
+# A (42 x 3) item by trait adjacency matrix
+d <- matrix(c(1, 0, 0),nrow=14,ncol=3,byrow=TRUE)
+a <- matrix(c(0, 1, 0),nrow=13,ncol=3,byrow=TRUE)
+s <- matrix(c(0, 0, 1),nrow=15,ncol=3,byrow=TRUE)
+das <- list(d, a, s)
+inItemTraitAdj  <- rbind(das[[1]], das[[2]], das[[3]])
+```
+
+The ple.lma command is the same and the analyses of output are as well.
+
+
+
+The small the examples presented here with $I=9$ four category items took less than 30 to 35 seconds on my desktop, but for more items, a larger sample size and more dimensions lead to longer computational time.  For the Nominal model, 3 dimensions and N=1000, the elapsed time equaled 900 seconds (i.e., ~15 minutes) and 15 iterations.  The GPCM and Nominal models tend to take the same amount of time and same number of iterations.
+
+ 
+# Other Functions and Future Versions
+
+All the functions used by pleLMA are available.  The pleLMA algorithm is modular and can be "cannibalized".  For example, in a replication study, the problem can be set up using the "set.up" function, which can be time consuming, and then use the "fit.rasch", "fit.gpcm" or "fit.nominal" that set ups the log files, formulas, and fits models.  On a replication only the response vector in the "master" data frame needs to be changed (i.e., do not have to re-create the master data frame) so a loop would go around the function that fits the model.  This same strategy can be used to perform jackknife or bootstrap to get standard errors for parameters.  Alternatively, functions can be pulled and modified to allow some items to be fit by a GPCM and other by the Nominal model.   
+
+In future versions, options for fitting different models to items will be added, more complex latent structures, multiple methods for estimating standard errors, allow for different numbers of categories per item, and the inclusion of collateral information.  Even though all of these variations can be done, the current version of the pleLMA package is a starting point.
+
