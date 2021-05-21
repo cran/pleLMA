@@ -15,7 +15,7 @@ plots of estimated scale values by integers
 \description{
 This function plots the estimated item scale values (i.e, nus) by integers
  to see shape of scaling of the categories.A linear regression is overlaid
- in the plot to help assess linearity. The dashed red line overlaid in the 
+ in the plot to help assess linearity. The dashed red line overlaid in the
  plot is the linear regression line of the scale values on integers.
 }
 \examples{

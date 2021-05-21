@@ -37,7 +37,6 @@ iterationPlot(g1)
 n1 <- ple.lma(inData, model.type="nominal", inItemTraitAdj,inTraitAdj)
 iterationPlot(n1)
 
-
 #--- Multidimensional models
  inTraitAdj  <- matrix(1, nrow=3, ncol=3)
 
@@ -53,5 +52,6 @@ iterationPlot(g3)
 n3 <- ple.lma(inData, model.type="nominal", inItemTraitAdj, inTraitAdj)
 iterationPlot(n3)
 }
+
 
 }

@@ -40,8 +40,6 @@ test_that("output from fitting uni-dimensional nominal", {
   expect_is(model$Phi.mat, "matrix")
   expect_is(model$mlpl.item, "numeric")
   expect_is(model$mlp.phi, "NULL")
-  expect_is(model$AIC, "numeric")
-  expect_is(model$BIC, "numeric")
 
   shows_message("No errors detected in the input")
 })
@@ -93,8 +91,6 @@ test_that("output from fitting multi-dimensional nominal", {
   expect_is(model$Phi.mat, "matrix")
   expect_is(model$mlpl.item, "numeric")
   expect_is(model$mlpl.phi, "logLik")
-  expect_is(model$AIC, "numeric")
-  expect_is(model$BIC, "numeric")
 
   shows_message("No errors detected in the input")
 })

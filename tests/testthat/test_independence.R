@@ -17,8 +17,6 @@ test_that("output from fitting independence is correct", {
   expect_is(model, "list")
   expect_is(model$phi.mnlogit, "mnlogit")
   expect_is(model$mlpl.phi, "numeric")
-  expect_is(model$AIC, "numeric")
-  expect_is(model$BIC, "numeric")
 
   shows_message("No errors detected in the input")
 

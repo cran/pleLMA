@@ -24,8 +24,6 @@ test_that("output from fitting unidimensional Rasch", {
   expect_is(model, "list")
   expect_is(model$phi.mnlogit, "mnlogit")
   expect_is(model$mlpl.phi, "logLik")
-  expect_is(model$AIC, "numeric")
-  expect_is(model$BIC, "numeric")
 
   shows_message("No errors detected in the input")
 
@@ -61,8 +59,6 @@ test_that("output from fitting multi-dimensional Rasch", {
   expect_is(model, "list")
   expect_is(model$phi.mnlogit, "mnlogit")
   expect_is(model$mlpl.phi, "logLik")
-  expect_is(model$AIC, "numeric")
-  expect_is(model$BIC, "numeric")
 
   shows_message("No errors detected in the input")
 

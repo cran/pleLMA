@@ -201,6 +201,7 @@ if (model.type == "independence") {
   Master <- as.data.frame(master)
   names(Master) <- c("PersonID", "CaseID", "Item","Category","y",
                      LambdaNames)
+  Master$y <- as.factor(Master$y)
 } else {
 
   ntraits <- nrow(TraitByTrait)                # number of latent
@@ -298,6 +299,8 @@ if (model.type == "independence") {
     Master <- as.data.frame(master)
     names(Master) <- c("PersonID", "CaseID", "Item","Category","y",
                        LambdaNames,NuNames)
+    Master$y <- as.factor(Master$y)
+
 }
 
 # --- these are specifically needed for mnlogit--- may not need

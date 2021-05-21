@@ -1,11 +1,10 @@
 ---
 title: "Pseudo-likelihood Estimation of Log-mulitplicative association models:  The pleLMA Package"
 author: "Carolyn J. Anderson"
-date: "4/26/2021"
+date: "5/19/2021"
 bibliography: pleLMA_vignette.bib
 output:
-  rmarkdown::html_vignette:
-  toc: true 
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette for the pleLMA Package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -26,7 +25,7 @@ This document starts with a brief description of the models and assumptions ofte
 
 # Log-multiplicative Assosciation Models
 
-Both $i$ and $k$ will denote variables and $j_i$ and $\ell_k$ will denote categories of variables $i$ and $k$, respectively; however, to keep the notation simpler the subscripts on categories will be suppressed. The index $m=1,\ldots, M$ is used to denote latent dimensions or traits. When describing the algorithm, $n$ will be used to index for subjects (individuals, cases, etc), where $n=1,\ldots, N$. The index $n$ is suppressed in the presentation of the model. Let $\mathbf{Y}$ be an $(I\times 1)$ vector of random categorical variables and $\mathbf{y}= (y_1, \ldots, y_I)'$ be it's realization where $y_i=j$. The most general LMA for the probability that $\mathbf{Y}=\mathbf{y}$ is
+Both $i$ and $k$ denote variables and $j_i$ and $\ell_k$ denote categories of variables $i$ and $k$, respectively; however, to keep the notation simpler the subscripts on categories will be suppressed. The index $m=1,\ldots, M$ is used to denote latent dimensions or traits. When describing the algorithm, $n$ will be used to index for subjects (individuals, cases, etc), where $n=1,\ldots, N$. The index $n$ is suppressed in the presentation of the model. Let $\mathbf{Y}$ be an $(I\times 1)$ vector of random categorical variables and $\mathbf{y}= (y_1, \ldots, y_I)'$ be it's realization where $y_i=j$. The most general LMA for the probability that $\mathbf{Y}=\mathbf{y}$ is
 $$\log (P(\mathbf{Y}=\mathbf{y})) = \lambda + \sum_{i=1} \lambda_{ij} + \sum_i \sum_{k>i} \sum_m \sum_{m'\ge m} \sigma_{mm'}\nu_{ijm}\nu_{k\ell m'}, $$
 where $\lambda$ ensures that probabilities sum to 1, $\lambda_{ij}$ is the marginal effect parameter for category $j$ of variable $i$, $\sigma_{mm'}$ is the association parameter for dimensions $m$ and $m'$, and $\nu_{ijm}$ and $\nu_{k\ell m'}$ are category scale values for items $i$ and $k$ on dimensions $m$ and $m'$, respectively. The association parameters measure the strength of the relationship between items and the category scale values represent the structure.  
 
@@ -61,7 +60,7 @@ As a default, the package sets $\nu_{ijm}$ to equally spaced numbers where $\sum
 Important for the pseudo-likelihood algorithm are the conditional distributions of the probability of a response on one item given values on all the others.  The algorithm maximizes the product of the (log) likelihoods for all the conditionals, which can be done by using maximum likelihood of the conditional distributions.  The conditional models that 'pleLMA' uses are 
 $$ P(Y_{in}=j|\mathbf{y_{-i,n}})  =  \frac{\exp (\lambda_{ij} + \nu_{ijm} \sum_{k\ne i}\sum_{m'} \sigma_{mm'}\nu_{k\ell(n) m'})} { \sum_h \exp(\lambda_{ih} + \nu_{ihm} \sum_{k\ne i}\sum_{m'} \sigma_{mm'}\nu_{k\ell(n) m'})} \hspace{1in}  \\ 
  =  \frac{\exp (\lambda_{ij} + \nu_{ijm}\tilde{\theta}_{-i,mn})} { \sum_h \exp(\lambda_{ih} + \nu_{ihm} \tilde{\theta}_{-i,mn})}\qquad\qquad (1)\\
- =  \frac{\exp (\lambda_{ij} + \sum_{m'}\sigma_{mm'}\ddot{\theta}_{ijm'n})} { \sum_h \exp(\lambda_{ih} + \sum_{m'}\sigma_{mm'}\ddot{\theta}_{ijm'n})}, \qquad (2)$$
+ =  \frac{\exp (\lambda_{ij} + \sum_{m'}\sigma_{mm'}\ddot{\theta}_{ijm'n})} { \sum_h \exp(\lambda_{ih} + \sum_{m'}\sigma_{mm'}\ddot{\theta}_{i,jm'n})}, \qquad (2)$$
 where $n$ indicates a specific individual (subject, case, respondent, etc), $\mathbf{y_{-i,n}}$ are responses by person $n$ to all items except item $i$, the subscript $\ell(n)$ indicates that person $n$ selected category $\ell$ on item $k$, and the predictor variables $\tilde{\theta}_{-i,mn}$ and $\ddot{\theta}_{ijm'n}$ are functions of the parameters representing interactions.  
 
 The predictor $\tilde{\theta}_{-i,mn}$ in (1) are weighted sums of person $n$'s category scale values for $k\ne i$, 
@@ -293,7 +292,7 @@ g1b <- ple.lma(inData, inItemTraitAdj, inTraitAdj, model.type="gpcm", starting.s
 ```
 Full discussion of the available output is discussed later, but for now to determine which model is better, we take a quick look at the values of the maximum of the log pseudo-likelihood function, which equal `r g1$mlpl.item` for the equally spaced scores and `r g1b$mlpl.item` for the un-equally spaced scores.  Both models have the same number of estimated parameters but the maximum of the log of the pseudo-likelihood (MLPL) is smaller for the model with alternative scores; therefore, the original model with equally spaced scores fits the data better. If the scores had been (0, 1, 2, 3), the model fit would be identical to the default scores set by the 'ple.lma' function.  The only difference would be in the $\hat{a}_{im}$s.  Alternative scores $x_j$ can also be input for models in the Rasch family. 
 
-Using 'starting.sv' with the Nominal model, sets the starting values for the $\nu_{ijm}$ parameters. For all models, the starting values for $\mathbf{\Sigma}$ can also be input.  For example, the nominal model can be re-fit in fewer iterations if we start it using the parameter estimates from a previous run.  For example, the scale values are in 'estimates' and $\sigma_{11}$ is in 'Phi.mat'.
+Using 'starting.sv' with the Nominal model sets the starting values for the $\nu_{ijm}$ parameters. For all models, the starting values for $\mathbf{\Sigma}$ can also be input.  For example, the nominal model can be re-fit in fewer iterations if we start it using the parameter estimates from a previous run.  For example, the scale values are in 'estimates' and $\sigma_{11}$ is in 'Phi.mat'.
 
 ```{r}
 n1$estimates
@@ -438,7 +437,7 @@ The commands to fit the models are the same
 ```{r, echo=TRUE, results='hide'}
 r3 <- ple.lma(inData, model.type="rasch", inItemTraitAdj, inTraitAdj)
   
-g2 <-  ple.lma(inData, model.type="gpcm", inItemTraitAdj, inTraitAdj)
+g3 <-  ple.lma(inData, model.type="gpcm", inItemTraitAdj, inTraitAdj)
 
 n3 <-  ple.lma(inData, model.type="nominal", inItemTraitAdj, inTraitAdj)
 ```
@@ -480,19 +479,22 @@ The 'ple.lma' and all other functions work in the same manner as shown in our sm
 
 ### Computational Time
 
-Larger numbers of items, more categories, and more cases will increase the computational time. In the table below are the user, system, and elapsed times in seconds for models fit to the dass data on my desktop (Intel i7, CPU 290 GHZ and 160.GB RAM) using defaults. On the left are times for the sub-set of the dass data (i.e., $N=250$, $I=9$ and $M=1$) and on the right are times for the full dass data set and most complex models (i.e., $N=1000$, $I=42$, $M=3$). The independence log-linear model and Rasch models take the least amount of time and are fit fairly quickly.  Even with the more model complex models and the full dass data set, the elapsed times is about 12 minutes. 
+Larger numbers of items, more categories, and more cases will increase the computational time. In the table below are the user, system, and elapsed times in seconds for models fit to the dass data on my desktop (Intel i7, CPU 290 GHZ and 160.GB RAM) using defaults. On the left are times for the sub-set of the dass data (i.e., $N=250$, $I=9$ and $M=1$) and on the right are times for the full dass data set and most complex models (i.e., $N=1000$, $I=42$, $M=3$). The independence log-linear model and Rasch models take the least amount of time and are fit fairly quickly. For the more complex models and the full dass data set, the elapsed times is about 12 minutes. 
 
 
  Model         | user   | system  | elapsed |  user  | system  | elapsed
 ---------------|--------|---------|---------|--------|---------|----------
 Independence   |   0.30 |  0.03   |   0.34  |  24.66 |   2.35  |  27.03
- Rasch         |   0.34 |  0.00   |   0.36  |  30.58 |   2.77  |  33.34
- GPCM          |  17.94 |  0.08   |  18.26  | 541.18 | 180.22  | 721.50
- Nominal       |  17.67 |  0.08   |  17.91  | 584.20 | 183.86  | 728.50 
+Rasch          |   0.34 |  0.00   |   0.36  |  30.58 |   2.77  |  33.34
+GPCM           |  17.94 |  0.08   |  18.26  | 541.18 | 180.22  | 721.50
+Nominal        |  17.67 |  0.08   |  17.91  | 584.20 | 183.86  | 728.50 
 -------------------------------------------------------------------------
 
 
-The computational times for the GPCM and Nominal models can be sped up by using parameter estimates from simpler models as starting values. The estimated Phi.mat from the Rasch model can be used as starting values in the GPCM model. The parameter estimates from the GPCM model (i.e., $\hat{a}_{im}x_j$ and $\hat{\phi}_{mm'}$) can be used as starting values in the Nominal model.  Additionally, tolerance can be decreased. Using this strategy and setting $\mbox{tol}=1e-03$, the elapsed time for the GPCM dropped down from $721.50$ to $443.36$ and the time for the Nominal model dropped from $728.50$ to $415.36$. Examining the convergence statistics and iterations plots for each parameter show that the parameters estimates essentially do not change after 5 to 6 iterations. If more iterations are needed or desired, the current parameters estimates can be used as starting values for additional iterations.
+The times for the GPCM and Nominal models can be sped up by taking measures that reduce the number of iterations. One method to do this is to use the estimated `Phi.mat' from the Rasch model as starting values in the GPCM model. Subsequently, the parameter estimates from the GPCM model (i.e., $\hat{a}_{im}x_j$ and $\hat{\phi}_{mm'}$) can be used as starting values in the Nominal model.  The second method to reduce the computational time increases tolerance. Using these smart starting values and setting $\mbox{tol}=1e-03$, the elapsed time for the GPCM dropped down from $721.50$ to $443.36$ and the time for the Nominal model dropped from $728.50$ to $415.36$ (i.e., about ~7 minutes). Examining the convergence statistics and iterations plots for each parameter shows that the parameters estimates essentially do not change after 5 to 6 iterations. If more iterations are needed or desired, the current parameters estimates can be used as starting values for additional iterations.
+
+Computational time can further be improved by using an alternative basic linear algebra system (BLAS). The default for R is not very fast and alternatives are available, such as OpenBlAS, ATLAS, and Intel MKL libraries. For PC users, the easiest way to use an alternative BLAS is to use Open R, which is free from Microsoft and uses the Intel MKL libraries. Using Open R, fitting the GPCM and Nominal models to the full DASS data set (i.e., $N=1000$, $I=42$, $M=3$) using the defaults of the pleLMA package, the ellapsed time was 6-7 minutes. This time was further reduced to 4 to 5 minutes by using Open R in conjunction with smart starting values and a larger value for the tolerence.
+
 
 # Example: Dichotomous Items
 

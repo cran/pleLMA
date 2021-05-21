@@ -108,7 +108,7 @@ das <- list(d, a, s)
 ## ---- echo=TRUE, results='hide'-----------------------------------------------
 r3 <- ple.lma(inData, model.type="rasch", inItemTraitAdj, inTraitAdj)
   
-g2 <-  ple.lma(inData, model.type="gpcm", inItemTraitAdj, inTraitAdj)
+g3 <-  ple.lma(inData, model.type="gpcm", inItemTraitAdj, inTraitAdj)
 
 n3 <-  ple.lma(inData, model.type="nominal", inItemTraitAdj, inTraitAdj)
 

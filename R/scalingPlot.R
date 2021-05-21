@@ -2,15 +2,15 @@
 #'
 #'  This function plots the estimated item scale values (i.e, nus) by integers
 #'  to see shape of scaling of the categories.A linear regression is overlaid
-#'  in the plot to help assess linearity. The dashed red line overlaid in the 
+#'  in the plot to help assess linearity. The dashed red line overlaid in the
 #'  plot is the linear regression line of the scale values on integers.
 #'
 #' @param  model.fit   Output from a nominal model
-#' 
+#'
 #' @returns plots of estimated scale values by integers
 #'
 #' @examples
-#' 
+#'
 #' #--- some data, 2 items from depression, anxiety and stress scales
 #' #    for 250 cases out of possible 1000
 #'  data(dass)
@@ -20,11 +20,6 @@
 #'  n1 <- ple.lma(inData, model.type="nominal", inItemTraitAdj, inTraitAdj, tol=1e-03)
 #'  scalingPlot(n1)
 #'
-#' @export
-scalingPlot <- function(model.fit){
-  UseMethod("scalingPlot")
-}
-
 #' @export
 scalingPlot <- function(model.fit) {
    item.log <- model.fit[[18]]

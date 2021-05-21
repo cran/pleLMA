@@ -9,6 +9,7 @@
 #'
 #' @param  model.fit    Object from fitting nominal or gpcm model to data
 #'
+#' @return  Plots of estimated parameters by iteration
 #' @examples
 #' 
 #' \donttest{
@@ -26,7 +27,6 @@
 #' n1 <- ple.lma(inData, model.type="nominal", inItemTraitAdj,inTraitAdj)
 #' iterationPlot(n1)
 #'
-#' 
 #' #--- Multidimensional models
 #'  inTraitAdj  <- matrix(1, nrow=3, ncol=3)
 #'
@@ -45,10 +45,9 @@
 #' iterationPlot(n3)
 #' }
 #' 
-#' @return  Plots of estimated parameters by iteration
 #'
 #' @export
-iterationPlot<- function(model.fit){
+iterationPlot <- function(model.fit){
   UseMethod("iterationPlot")
 }
 
