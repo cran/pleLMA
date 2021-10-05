@@ -26,12 +26,11 @@ test_that("output from fitting uni-dimensional gpcm", {
   expect_equal(nrow(model$ItemByTrait), 9)
 
   expect_is(model, "list")
-  expect_is(model$phi.mnlogit, "NULL")
-  expect_is(model$item.mnlogit, "list")
+  expect_is(model$phi.mlogit, "NULL")
   expect_is(model$Phi.mat, "matrix")
   expect_is(model$mlpl.item, "numeric")
   expect_is(model$mlp.phi, "NULL")
- 
+
   shows_message("No errors detected in the input")
 
 })
@@ -64,12 +63,12 @@ test_that("output from fitting multi-dimensional gpcm", {
   expect_equal(nrow(model$ItemByTrait), 9)
 
   expect_is(model, "list")
-  expect_is(model$phi.mnlogit, "summary.mnlogit")
-  expect_is(model$item.mnlogit, "list")
+  expect_is(model$phi.mlogit, "summary.mlogit")
+  expect_is(model$item.mlogit, "mlogit")
   expect_is(model$Phi.mat, "matrix")
   expect_is(model$mlpl.item, "numeric")
-  expect_is(model$mlpl.phi, "logLik")
-  
+  expect_is(model$mlpl.phi, "numeric")
+
   shows_message("No errors detected in the input")
 
 })

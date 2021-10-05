@@ -1,7 +1,6 @@
 ---
 title: "Pseudo-likelihood Estimation of Log-mulitplicative association models:  The pleLMA Package"
-author: "Carolyn J. Anderson"
-date: "5/19/2021"
+author: "9/30/2021"
 bibliography: pleLMA_vignette.bib
 output:
   rmarkdown::html_vignette
@@ -81,7 +80,7 @@ The algorithm is modular and has two major components.
 
 The two components are combined to estimate LMA models corresponding to multidimensional GPCM or nominal models.
 
-All algorithms work with a Master data set that is a vertical concatenation of the data for each category of each item and for each individual (i.e., a stacked data set).  The number of rows equals the number of  cases$\times$ number of items $\times$ number of categories per item.  Model (1) is fit to a sub-set of the Master data set for a specific item ("item data" for item regressions), and model (2) is fit to the entire Master data set ("stacked data" for stacked regressions). The Master data set is properly formatted for input to 'mnlogit', which also means that sub-sets are properly formatted.      
+All algorithms work with a Master data set that is a vertical concatenation of the data for each category of each item and for each individual (i.e., a stacked data set).  The number of rows equals the number of  cases$\times$ number of items $\times$ number of categories per item.  Model (1) is fit to a sub-set of the Master data set for a specific item ("item data" for item regressions), and model (2) is fit to the entire Master data set ("stacked data" for stacked regressions). The Master data set is properly formatted for input to 'mlogit', which also means that sub-sets are properly formatted.      
 
 ### Alogrithm I: Estimation of $\lambda_{ij}$ and $\nu_{ijm}$ (or $a_{im}$)
 
@@ -154,7 +153,7 @@ Algorithm II was proposed by @AndersonLiVermunt2007  for models in the Rasch fam
 
 # The Package
 
-The 'pleLMA' package uses base R for data manipulation, 'stats' for specifying formulas, and 'graphics' for plotting results. The current package uses the 'mnlogit' package (@Hasanetal2016) to the fit the conditional multinomial models (i.e., discrete choice models) to the data. We expect that given the use of base R, stats and graphics that the package will be forward compatible with future releases of R.  
+The 'pleLMA' package uses base R for data manipulation, 'stats' for specifying formulas, and 'graphics' for plotting results. The current package uses the 'mlogit' package (@Yves2020) to the fit the conditional multinomial models (i.e., discrete choice models) to the data. We expect that given the use of base R, stats and graphics that the package will be forward compatible with future releases of R.  
 
 The function 'ple.lma' is the main wrapper function that takes as input the data and model specifications.  This function calls three functions that perform the following tasks:
 
@@ -203,7 +202,7 @@ and for more information including the items themselves and the response scale, 
 ?dass
 ```
 
-The data should be a data frame where the rows are individuals or cases and the columns are different variables or items that will be modeled. The rows can be thought of as response patterns or cells of a cross-classification of the categorical variables. Within the data frame, the categories for each variable should run from 1 to the number of categories.  In this version of the package, the number of categories per variable should all be the same; therefore, there should be at least one repsonse for each category of each variable (required by "mnlogit"). There are no other restrictions on the number of categories.
+The data should be a data frame where the rows are individuals or cases and the columns are different variables or items that will be modeled. The rows can be thought of as response patterns or cells of a cross-classification of the categorical variables. Within the data frame, the categories for each variable should run from 1 to the number of categories.  In this version of the package, the number of categories per variable should all be the same; therefore, there should be at least one repsonse for each category of each variable (required by "mlogit"). There are no other restrictions on the number of categories.
 
 ## Basic syntax of 'ple.lma'
 
@@ -270,7 +269,7 @@ For models in the Rasch family, we simply add the adjacency matries and change t
 #--- Model in the rasch family
 r1 <-  ple.lma(inData, model.type="rasch", inItemTraitAdj, inTraitAdj)
 ```
-The independence log-linear model and models in the Rasch family only involve iterations within the package 'mnlogit'. The tolerance and convergence information reported for these models are from 'mnlogit' of the stacked regression .  
+The independence log-linear model and models in the Rasch family only involve iterations within the package 'mlogit'. The tolerance and convergence information reported for these models are from 'mlogit' of the stacked regression .  
 
 The GPCM and Nominal models involve iteratively fitting discrete choice models (i.e., conditional multinomial logistic regression models). In addition to messages about errors and set up, information is printed to the console about the progress of the algorithm. For the GPCM, the minimal input is
 ```{r}
@@ -327,7 +326,7 @@ You can also request specific sections as follows.  For the basic summary report
 noquote(lma.summary(n1)$report)
 ```
 
-AIC and BIC are included in the summary and may differ from those in the output from mnlogit.  The 'ple.lma' package computes these as 
+AIC and BIC are included in the summary and may differ from those in the output from mlogit.  The 'ple.lma' package computes these as 
 $$\mbox{AIC} = -2*\mbox{mlpl} + p$$
 $$\mbox{BIC} = -2*\mbox{mlpl} + p*\log(N)\ ,$$
 where $\mbox{mlpl}$ is the maximum of the log of the pseudo-likelihood function, $p$ is the number of parameters, and $N$ is the sample size (i.e., number of cases or individuals). Models with smaller values are better.  Note that AIC tends to select more complex models and BIC tends to select simpler models. Deciding on a model should not rest solely on global statistics. 
@@ -353,17 +352,17 @@ For the GPCM (and models in the Rasch family), 'estimates' includes the $x_j$'s 
 g1$estimates
 ```
 
-For more detailed information about items' regressions after convergence, output from 'mnlogit' is saved. All the information that can be extracted from 'mnlogit' objects can be obtained (e.g., residuals, various fit statistics, etc).  Below are the names and classes for these objects:
+For more detailed information about items' regressions after convergence, output from 'mlogit' is saved. All the information that can be extracted from 'mlogit' objects can be obtained (e.g., residuals, various fit statistics, etc).  Below are the names and classes for these objects:
 
-Dimensions   |   Model     |  item.log  | phi.log  | item.mnlogit | phi.mnlogit 
+Dimensions   |   Model     |  item.log  | phi.log  | item.mlogit | phi.mlogit 
 -------------|------------ |------------|----------|--------------|------------
-0            | independence|   NULL     |  NULL    |   NULL       | mnlogit
-1            | rasch       |   NULL     |  NULL    |   NULL       | mnlogit
+0            | independence|   NULL     |  NULL    |   NULL       | mlogit
+1            | rasch       |   NULL     |  NULL    |   NULL       | mlogit
 1            | gpcm        |   list     |  NULL    |   list       | NULL
 1            | nominal     |   list     |  NULL    |   list       | NULL
->1           | rasch       |   NULL     |  NULL    |   NULL       | mnlogit
->1           | gpcm        |   list     |  matrix  |   list       | mnlogit
->1           | nominal     |   list     |  matrix  |   list       | mnlogit
+>1           | rasch       |   NULL     |  NULL    |   NULL       | mlogit
+>1           | gpcm        |   list     |  matrix  |   list       | mlogit
+>1           | nominal     |   list     |  matrix  |   list       | mlogit
 ------------------------------------------------------------------------------
 
 
@@ -381,12 +380,33 @@ If you run the above command you see that algorithm gets very close to the final
 
 
 For another view of how well the algorithm converged, we can look at the differences between values from the last two iterations, which is given for each item's maximum log-likelihood and all item parameters. The function 'convergence.stats' is internal to the 'fit.nominal' function and requires input that is not available in the model fit output. To run 'convergance.stats', you have to first run 'set.up' as follows:
-```{r}
+```{r eval=FALSE}
 s <- set.up(inData, model.type='nominal', inTraitAdj, inItemTraitAdj)
 
 convergence.stats(n1$item.log, n1$nitems, n1$nless, s$LambdaName, s$NuName)
 ```
-There is a "$\$$diff.last" for the items' maximum log likelihoods, lambda parameters, and scale values.  The length of each of these corresponds to the number of items.  Even though tol$=1e-06$, the largest differences for the item parameters are considerably smaller.  For the GPCM model, the command is 
+The output will include lines such as
+
+ $diff.last.LogLike
+ 
+[1]  -1.135732e-07 -1.712294e-09 -3.595750e-07  1.972623e-07  3.441160e-07
+   8.999615e-08  7.581832e-08  4.029459e-09  1.782126e-07
+ 
+
+ 
+$diff.last.lam2
+
+
+[1] -2.899204e-09 -2.412534e-09 -2.610206e-09 -8.204556e-10  2.656844e-09
+   7.331145e-10 -3.150264e-10 -5.599238e-10 -4.942857e-11
+
+$diff.last.nu4
+
+[1] -9.993916e-09 -9.844411e-09 -9.974334e-09 -2.000938e-09  6.178604e-09
+  2.790911e-09  5.502777e-09  4.125844e-09  3.617542e-09
+
+
+There is a "$\$$diff.last" for the items' maximum log likelihoods (i.e., diff.lat.LogLike), lambda parameters (e.g, diff.last.lambda2), and scale values (e.g., diff.last.nu4). The length of each of these corresponds to the number of items. Even though tol$=1e-06$, the largest differences for the item parameters are considerably smaller. For the GPCM model, the command is 
 ```{r, eval=FALSE}
 s <- set.up(inData, model.type='gpcm', inTraitAdj, inItemTraitAdj)
 
@@ -449,7 +469,7 @@ Further more,
 ```{r}
 noquote(lma.summary(n3)$report) 
 ``` 
-Note that for the multi-dimensional model, the object 'phi.mnlogit' is no longer NULL  for the GPCM and Nominal models. Stacked regression are required to get estimates of the $\sigma_{mm'}$ parameters. Unlike the independence and Rasch models, the GPCM and Nominal models iteratively estimates the $\sigma_{mm'}$ parameters. 
+Note that for the multi-dimensional model, the object 'phi.mlogit' is no longer NULL  for the GPCM and Nominal models. Stacked regression are required to get estimates of the $\sigma_{mm'}$ parameters. Unlike the independence and Rasch models, the GPCM and Nominal models iteratively estimates the $\sigma_{mm'}$ parameters. 
 
 The matrix of association parameters (conditional correlation matrix) is in the object 
 ```{r}
@@ -479,21 +499,24 @@ The 'ple.lma' and all other functions work in the same manner as shown in our sm
 
 ### Computational Time
 
-Larger numbers of items, more categories, and more cases will increase the computational time. In the table below are the user, system, and elapsed times in seconds for models fit to the dass data on my desktop (Intel i7, CPU 290 GHZ and 160.GB RAM) using defaults. On the left are times for the sub-set of the dass data (i.e., $N=250$, $I=9$ and $M=1$) and on the right are times for the full dass data set and most complex models (i.e., $N=1000$, $I=42$, $M=3$). The independence log-linear model and Rasch models take the least amount of time and are fit fairly quickly. For the more complex models and the full dass data set, the elapsed times is about 12 minutes. 
+Larger numbers of items, more categories, more cases, and more complex models all increase the computational time. In the table below are the elapsed times in seconds for models fit to the dass data on a PC (Intel i7, CPU 290 GHZ and 160.GB RAM) using ple.lma defaults. The default basic linear algebra library system in R is not very fast; however, there are alternatives, including OpenBlAS, ATLAS, and the Intel MKL library. The elapsed times reported below were run using the Intel MKL BLAS, which is implemented in Open R (free from Microsoft). 
 
 
- Model         | user   | system  | elapsed |  user  | system  | elapsed
----------------|--------|---------|---------|--------|---------|----------
-Independence   |   0.30 |  0.03   |   0.34  |  24.66 |   2.35  |  27.03
-Rasch          |   0.34 |  0.00   |   0.36  |  30.58 |   2.77  |  33.34
-GPCM           |  17.94 |  0.08   |  18.26  | 541.18 | 180.22  | 721.50
-Nominal        |  17.67 |  0.08   |  17.91  | 584.20 | 183.86  | 728.50 
--------------------------------------------------------------------------
+Cases (N) | Items (I) | Dimensions (M) | Independence | Rasch |  GPCM  | Nominal
+----------|-----------|----------------|--------------|-------|--------|---------
+ 250      | 9         |    1           |    0.20      |  0.22 |  4.20  |   4.31
+ 250      | 9         |    3           |    0.20      |  0.27 |  13.04 |  13.33
+ 250      | 42        |    1           |    1.01      |  1.15 |  16.75 |  17.44
+ 250      | 42        |    3           |    2.24      |  2.51 |  59.11 |  59.10
+ 1000     | 9         |    1           |    1.08      |  1.23 |  17.34 |  17.94
+ 1000     | 9         |    3           |    1.04      |  1.31 |  47.34 |  47.68
+ 1000     | 42        |    1           |   15.96      | 16.68 | 242.21 | 243.55
+ 1000     | 42        |    3           |   12.75      | 16.83 | 435.51 | 465.47      |  
+---------------------------------------------------------------------------------
 
 
-The times for the GPCM and Nominal models can be sped up by taking measures that reduce the number of iterations. One method to do this is to use the estimated `Phi.mat' from the Rasch model as starting values in the GPCM model. Subsequently, the parameter estimates from the GPCM model (i.e., $\hat{a}_{im}x_j$ and $\hat{\phi}_{mm'}$) can be used as starting values in the Nominal model.  The second method to reduce the computational time increases tolerance. Using these smart starting values and setting $\mbox{tol}=1e-03$, the elapsed time for the GPCM dropped down from $721.50$ to $443.36$ and the time for the Nominal model dropped from $728.50$ to $415.36$ (i.e., about ~7 minutes). Examining the convergence statistics and iterations plots for each parameter shows that the parameters estimates essentially do not change after 5 to 6 iterations. If more iterations are needed or desired, the current parameters estimates can be used as starting values for additional iterations.
 
-Computational time can further be improved by using an alternative basic linear algebra system (BLAS). The default for R is not very fast and alternatives are available, such as OpenBlAS, ATLAS, and Intel MKL libraries. For PC users, the easiest way to use an alternative BLAS is to use Open R, which is free from Microsoft and uses the Intel MKL libraries. Using Open R, fitting the GPCM and Nominal models to the full DASS data set (i.e., $N=1000$, $I=42$, $M=3$) using the defaults of the pleLMA package, the ellapsed time was 6-7 minutes. This time was further reduced to 4 to 5 minutes by using Open R in conjunction with smart starting values and a larger value for the tolerence.
+For most models and conditions, the elapsed times ranged from a fraction of a second to about 8 minutes. The times for the GPCM and Nominal models can be further sped up by taking measures that reduce the number of iterations. One method to do this is to use the estimated `Phi.mat' from the Rasch model as starting values in the GPCM model. Subsequently, the parameter estimates from the GPCM model (i.e., $\hat{a}_{im}x_j$ and $\hat{\phi}_{mm'}$) can be used as starting values in the Nominal model. A second method to reduce the computational time is to increase tolerance. Examining the convergence statistics and iterations plots for each parameter shows that the parameters estimates essentially do not change after 5 to 6 iterations; therefore, decreasing tolerence (tol) is acceptable. If more iterations are needed or desired, the current parameters estimates can be used as starting values. Using smart starting values and setting $\mbox{tol}=1e-03$, the elapsed time for $N=1000$, $I=42$ and $M=3$ GPCM went from $435.51$ to $289.44$ (i.e., $7.3$ to $4.8$ minutes) to and the time for the Nominal model dropped from $465.47$ to $302.29$ seconds (i.e., $7.8$ to $5.0$ minutes). 
 
 
 # Example: Dichotomous Items
@@ -560,8 +583,8 @@ item.log     | log file of $\hat{\nu}_{ijm}$s (or $a_{im}$) and  $\hat{\lambda}_
 phi.log      | log file of $\hat{\phi}_{mm'}$ and $\hat{\lambda}_{ij}$ |        | &#10004;| &#10004;
 estimates    | item by estimated item parameters and log(Likelihood)  | &#10004;| &#10004;| &#10004;
 Phi.mat      | estimated $\mathbf{\Sigma}$s (matrix of association parameters)  | &#10004;| &#10004;| &#10004;
-item.mnlogit | list of 'mnlogit' output from item regressions after convergence | &#10004;|         | &#10004;
-phi.mnlogit | 'mnlogit' output for $\sigma_{mm'}$s from stacked regression after convergence |         | &#10004;| &#10004;
+item.mlogit | list of 'mlogit' output from item regressions after convergence | &#10004;|         | &#10004;
+phi.mlogit | 'mlogit' output for $\sigma_{mm'}$s from stacked regression after convergence |         | &#10004;| &#10004;
 mlpl.item    | value of the maximum log pseudo-likelihood function from item regressions   | &#10004;|         | &#10004;
 mlpl.phi     | value of the maximum log pseudo-likelihood function from stacked regression  |         | &#10004;| &#10004;
 AIC          | Akaike information criteria (smaller is better)        | &#10004;| &#10004;| &#10004;

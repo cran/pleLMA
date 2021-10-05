@@ -1,4 +1,4 @@
-#' Fits the log-linear model of independence
+#' Fits the log-linear model of independence  
 #'
 #' This function fits by the log-linear model of independence (i.e., only
 #' includes marginal effect terms) using pseudo-likelihood estimation.
@@ -15,7 +15,7 @@
 #' @param  ItemNames       Used for row names of number of item by parameter matrix of
 #'                          estimated Lambda parameters
 #'
-#' @return phi.mnlogit     Parameters estimates and mlpl = logLike output from mnlogit
+#' @return phi.mlogit     Parameters estimates and mlpl = logLike output from mnlogit
 #' @return fstack          Formual used in stacked regression
 #' @return estimates       Item by parameter estimates matrix
 #' @return mlpl.phi        Maximum of log pseudo-likelihood from stacked regression
@@ -34,23 +34,27 @@
 #' @export
 fit.independence <- function(Master, LambdaNames, LambdaName, ItemNames) {
 
-  # --- formula ---
+# --- make mlogit data
+  master.mlogit <- dfidx::dfidx(Master, choice="y", idx=c("CaseID","alt"))
 
-  fstack <- stats::as.formula(paste("y ~", paste(LambdaNames, collapse="+"),"| 0 | 0",sep=" "))
+  fstack <- stats::as.formula(paste("choice ~ ", paste(LambdaNames,
+            collapse = "+"), "| 0 | 0", sep=" ") )
 
-  # --- fit model
-  fit.stack <- mnlogit::mnlogit(fstack, Master, choiceVar="Category")
+  fit.stack <- mlogit::mlogit(fstack, master.mlogit)
 
-  # --- save some things
-  parms <- fit.stack$coefficients
-  estimates <- matrix(parms, nrow=length(unique(Master$Item)), ncol=(length(unique(Master$Category))-1))
-  e1 <- -(rowSums(estimates))
-  estimates <- cbind(e1,estimates)
-  rownames(estimates) <- ItemNames
-  colnames(estimates) <- c("lam1", LambdaName)
+ # --- save some things
+    estimates <- matrix(fit.stack$coefficients,
+	                 nrow=length(unique(Master$Item)),
+					 ncol=(length(unique(Master$Category))-1),
+					 byrow=TRUE)
+
+    e1 <- -(rowSums(estimates))
+    estimates <- cbind(e1,estimates)
+    rownames(estimates) <- ItemNames
+    colnames(estimates) <- c("lam1", LambdaName)
 
   # --- maximum of log pseudo-likelihood function
-  mlpl.phi <- fit.stack$logLik
+  mlpl.phi <- as.numeric(fit.stack$logLik)
 
   # --- AIC
   AIC <- -1*mlpl.phi - length(LambdaNames)
@@ -60,7 +64,7 @@ fit.independence <- function(Master, LambdaNames, LambdaName, ItemNames) {
 
   summary.stack <- summary(fit.stack)
 
-  results <- list(phi.mnlogit = summary.stack,
+  results <- list(phi.mlogit = summary.stack,
                   fstack = fstack,
                   estimates = estimates,
                   mlpl.phi = mlpl.phi[1],

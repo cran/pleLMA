@@ -82,9 +82,9 @@ fitem		      Formula for item data
 
 fstack	      Formula for stacked data
 
-item.mnlogit 	Summary from final run of mnlogit for item regressions for each item
+item.mlogit 	Summary from final run of mlogit for item regressions for each item
 
-phi.mnlogit	  Summary from final run mnlogit for stacked regression
+phi.mlogit	  Summary from final run mlogit for stacked regression
 
 mlpl.item     Value of maximum of log ple function from fitting items (i.e., sum of logLike)
 

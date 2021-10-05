@@ -71,10 +71,10 @@ g1$estimates
 ## ---- eval=FALSE--------------------------------------------------------------
 #  iterationPlot(n1)
 
-## -----------------------------------------------------------------------------
-s <- set.up(inData, model.type='nominal', inTraitAdj, inItemTraitAdj)
-
-convergence.stats(n1$item.log, n1$nitems, n1$nless, s$LambdaName, s$NuName)
+## ----eval=FALSE---------------------------------------------------------------
+#  s <- set.up(inData, model.type='nominal', inTraitAdj, inItemTraitAdj)
+#  
+#  convergence.stats(n1$item.log, n1$nitems, n1$nless, s$LambdaName, s$NuName)
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  s <- set.up(inData, model.type='gpcm', inTraitAdj, inItemTraitAdj)

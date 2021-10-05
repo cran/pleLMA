@@ -1,4 +1,4 @@
-#' Produces a summary of results
+#' Produces a summary of results 
 #'
 #' This utility function creates a summary list with five elements.
 #' The first is a 'report' that contains a summary of characteristics
@@ -73,8 +73,8 @@ lma.summary <- function(model.fit) {
   phi.log     <- model.fit$phi.log
   estimates   <- model.fit$estimates
   Phi.mat     <- model.fit$Phi.mat
-  item.mnlogit<- model.fit$item.mnlogit
-  phi.mnlogit <- model.fit$phi.mnlogit
+  item.mlogit<- model.fit$item.mlogit
+  phi.mlogit <- model.fit$phi.mlogit
   mlpl.item   <- model.fit$mlpl.item
   mlpl.phi    <- model.fit$mlpl.phi
   AIC         <- model.fit$AIC
@@ -97,8 +97,8 @@ lma.summary <- function(model.fit) {
 
   if (model.type == "rasch" || model.type=="independence") {
      n.iter <- 1
-     criterion <- phi.mnlogit$est.stat$funcDiff
-     tol <-  phi.mnlogit$est.stat$stopCond
+     criterion <- phi.mlogit$est.stat$funcDiff
+     tol <-  phi.mlogit$est.stat$stopCond
 
 } else {
      hist <-item.log[[1]]

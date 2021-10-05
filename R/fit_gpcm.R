@@ -41,8 +41,8 @@
 #' @return 	Phi.mat	   	  Estimated matrix of association parameters
 #' @return 	fitem		      Formula for item data
 #' @return 	fstack	      Formula for stacked data
-#' @return 	item.mnlogit 	Summary from final run of mnlogit for item regressions for each item
-#' @return 	phi.mnlogit	  Summary from final run mnlogit for stacked regression
+#' @return 	item.mlogit 	Summary from final run of mlogit for item regressions for each item
+#' @return 	phi.mlogit	  Summary from final run mlogit for stacked regression
 #' @return 	mlpl.item     Value of maximum of log ple function from fitting items (i.e., sum of logLike)
 #' @return 	mlpl.phi	    Value of maximum of log ple function from stacked regression to get phi estimates
 #' @return  AIC           Akaike information criterion for pseudo-likelihood (smaller is better)
@@ -110,7 +110,7 @@ fit.gpcm <- function(Master, Phi.mat, PersonByItem, TraitByTrait, item.by.trait,
   	                             PersonByItem, npersons, nitems,
   	                             ncat,  nless, ntraits, Maxnphi, pq.mat,
   	                            starting.sv, LambdaName)
-  	  Master <- itemLoop.gpcm$Master
+  	    Master <- itemLoop.gpcm$Master
  	    item.log <- itemLoop.gpcm$item.log
 
 
@@ -120,11 +120,11 @@ fit.gpcm <- function(Master, Phi.mat, PersonByItem, TraitByTrait, item.by.trait,
 		criterion <- 10                                   # Any number greater than tol
 		while (criterion>tol) {
 
-		  itemLoop.gpcm <- item.gpcm(Master, item.log, Phi.mat, fitem,
-		                             TraitByTrait,
-		                             PersonByItem, npersons, nitems,
-		                             ncat,  nless, ntraits, Maxnphi, pq.mat,
-		                             starting.sv, LambdaName)
+		    itemLoop.gpcm <- item.gpcm(Master, item.log, Phi.mat, fitem,
+		                            TraitByTrait,
+		                            PersonByItem, npersons, nitems,
+		                            ncat,  nless, ntraits, Maxnphi, pq.mat,
+		                            starting.sv, LambdaName)
 			Master <- itemLoop.gpcm$Master
 			item.log <- itemLoop.gpcm$item.log
 
@@ -171,26 +171,27 @@ fit.gpcm <- function(Master, Phi.mat, PersonByItem, TraitByTrait, item.by.trait,
 	  }
   }
 
-	  # --- one last set of models to save output from mnlogit ---
-
+	  # --- one last set of models to save output from mlogit ---
 	  desired_length <- nitems
-	  item.mnlogit <- vector(mode = "list", length = desired_length)
+	  item.mlogit <- vector(mode = "list", length = desired_length)
 	  for (item in 1:nitems) {
-	    ItemFit <- ItemGPCM.data(Master, ItemID=item, Phi.mat, TraitByTrait, pq.mat,
+	    DataForItem <- ItemGPCM.data(Master, ItemID=item, Phi.mat, TraitByTrait, pq.mat,
 	                             starting.sv,  npersons, nitems, ncat, nless,
 	                             ntraits, LambdaName)
-	    model.fit    <- mnlogit::mnlogit(fitem, ItemFit[[1]], choiceVar="Category")
-	    item.mnlogit[[item]] <- summary(model.fit)
-	  }
+        data.fit  <- DataForItem$ItemFit
+	      gpcmitem  <- dfidx::dfidx(data.fit, choice="y", idx=c("CaseID","alt"))
+        item.mlogit <- mlogit::mlogit(fitem, gpcmitem)
+ 	  }
 
 	  if (ntraits > 1) {
 	    StackedData <- StackDataGPCM(Master, item.log, starting.sv, npersons,
 	                                 nitems, ncat, nless, Maxnphi, pq.mat,
 	                                 LambdaNames, PhiNames)
-	    model.fit<- mnlogit::mnlogit(fstack, StackedData, choiceVar="Category")
-	    phi.mnlogit <- summary(model.fit)
+	    stacked    <-  dfidx::dfidx(StackedData, choice="y", idx=c("CaseID","alt"))
+	    model.fit<- mlogit::mlogit(fstack, stacked)
+ 	    phi.mlogit <- summary(model.fit)
 	  } else {
-	    phi.mnlogit <- NULL
+	      phi.mlogit <- NULL
 	  }
 
   # --- save parameter estimates ---
@@ -204,29 +205,30 @@ fit.gpcm <- function(Master, Phi.mat, PersonByItem, TraitByTrait, item.by.trait,
   rownames(item.save) <- ItemNames
 
 	if (ncat > 2) {
-		lam1 <- -rowSums(item.save[,3:(2+nless)])
-		item.save <- cbind(item.save[,2],lam1,item.save[,3:(2+ncat)], starting.sv)
+        lam1 <- -rowSums(item.save[,3:(1+ncat)])
+	    item.save <- cbind(item.save[,2],lam1,item.save[,3:(2+ncat)], starting.sv)
 	} else {
-		lam1 <- -item.save[,3]
-		item.save <- cbind(item.save[,2],lam1,item.save[,3], item.save[,4], starting.sv)
+       lam1 <- -item.save[,3]
+       item.save <- cbind(item.save[,2],lam1,item.save[,3], item.save[,4], starting.sv)
 	}
   estimates <- item.save
   lambdaName<- matrix(NA, nrow=1, ncol=ncat)
   xNames <- matrix(NA,nrow=1,ncol=ncat)
+
   for (cat in 1:ncat){
-     lambdaName[cat] <- paste("lamba", cat, sep="")
+     lambdaName[cat] <- paste("lambda", cat, sep="")
      xNames[cat] <- paste("x", cat, sep="")
   }
  colnames(estimates) <- c("loglike", lambdaName, "a", xNames)
 
   # --- Max of ple function to items and phi ---
-	mlpl.item <- sum(estimates[,1])
-  mlpl.phi  <- phi.mnlogit$logLik
+	mlpl.item <- sum(estimates[, 1])
+	mlpl.phi  <- as.numeric(phi.mlogit$logLik)
 
   # --- Information criteria for pseudo-likelihood
-  nparm <- nless*nitems + nitems + Maxnphi- ntraits
-  AIC <- -1*mlpl.item - nparm
-  BIC <- -2*mlpl.item - nparm*log(length(unique(Master$PersonID)))
+    nparm <- nless*nitems + nitems + Maxnphi- ntraits
+    AIC <- -1*mlpl.item - nparm
+    BIC <- -2*mlpl.item - nparm*log(length(unique(Master$PersonID)))
 
 
 	# --- output from fit.gpcm ---
@@ -237,8 +239,8 @@ results <- list(item.log=item.log,
                 Phi.mat=Phi.mat,
                 fitem=fitem,
                 fstack=fstack,
-				        item.mnlogit=item.mnlogit,
-			          phi.mnlogit=phi.mnlogit,
+				        item.mlogit=item.mlogit,
+			          phi.mlogit=phi.mlogit,
 				        mlpl.item=mlpl.item,
 			          mlpl.phi=mlpl.phi,
 				        AIC = AIC,

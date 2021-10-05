@@ -2,7 +2,7 @@
 % Please edit documentation in R/Scale.R
 \name{Scale}
 \alias{Scale}
-\title{Imposes scaling constraint to identify parameters LMA (nominal) model}
+\title{Imposes scaling constraint to identify parameters of the LMA (nominal) model}
 \usage{
 Scale(
   Master,

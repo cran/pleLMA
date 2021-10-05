@@ -76,7 +76,8 @@ fitStackGPCM <- function(Master, item.log, phi.log, fstack, TraitByTrait,
   names(stack.data) <- c("CaseID", "Item", "Category", "y", LambdaNames, PhiNames, "alt", "choice")
 
   ####### ---Fit stacked data
-	model.fit<- mnlogit::mnlogit(fstack, stack.data, choiceVar="Category")
+    stacked    <-  dfidx::dfidx(stack.data, choice="y", idx=c("CaseID","alt"))
+	model.fit<- mlogit::mlogit(fstack, stacked)
 
   # --- Prepare output
 	parms <- model.fit$coefficients
@@ -96,6 +97,6 @@ fitStackGPCM <- function(Master, item.log, phi.log, fstack, TraitByTrait,
 	    }
 	  }
 	}
-	results <- list(Phi.mat=Phi.mat,phi.log=phi.log)
+	results <- list(Phi.mat=Phi.mat, phi.log=phi.log)
 	return(results)
 }

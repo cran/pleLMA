@@ -81,23 +81,23 @@ criterion	 Current value of the convergence statistic
 
 estimates 	 Item x parameter matrix: LogLike, lambda and scale values
 
-Phi.mat	   Estimated conditional correlation matrix
+Phi.mat	     Estimated conditional correlation matrix
 
-fitem		   Formula for item data
+fitem		 Formula for item data
 
 fstack	     Formula for stacked data
 
-item.mnlogit Summaries from final run of mnlogit for item regressions
+item.mlogit   Summaries from final run of mlogit for item regressions
 
-phi.mnlogit	Summary from final run of mnlogit for stacked regression
+phi.mlogit	 Summary from final run of mlogit for stacked regression
 
 mlpl.item	 Max log pseudo-likelihood function from item regressions
 
-mlpl.phi    Maximum of log pseudo-likelihood function from stacked regression
+mlpl.phi      Maximum of log pseudo-likelihood function from stacked regression
 
-AIC         Akaike information criterion for pseudo-likelihood (smaller is better)
+AIC           Akaike information criterion for pseudo-likelihood (smaller is better)
 
-BIC         Bayesian information criterion for pseudo-likelihood (smaller is better)
+BIC           Bayesian information criterion for pseudo-likelihood (smaller is better)
 }
 \description{
 Function estimates the parameters of LMA models where the category scale

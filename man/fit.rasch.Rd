@@ -16,7 +16,8 @@ fit.rasch(
   LambdaNames,
   PhiNames,
   ItemNames,
-  LambdaName
+  LambdaName,
+  ntraits
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ fit.rasch(
 
 \item{nless}{Number of unique Lambdas (i.e., ncat-1)}
 
-\item{Maxnphi}{Number of association parameters}
+\item{Maxnphi}{Number of phi parameters}
 
 \item{pq.mat}{One dimensional array to compute rest-scores}
 
@@ -44,6 +45,8 @@ for stacked regression}
 \item{ItemNames}{Names of items}
 
 \item{LambdaName}{Names of lambdas used in output}
+
+\item{ntraits}{Number of traits}
 }
 \value{
 estimates 	  An item by parameter matrix of the maximum of the log likelihood,
@@ -52,7 +55,7 @@ estimates 	  An item by parameter matrix of the maximum of the log likelihood,
 
 fstack	    	Formula for stacked regression
 
-phi.mnlogit	Results from mnlogit for stacked regression
+phi.mlogit	Results from mlogit for stacked regression
 
 estimates    An item x parameter estimate matrix and fixed category scores used
 
@@ -86,6 +89,6 @@ of the main wrapper function.
 
  r <- fit.rasch(s$Master, s$npersons, s$nitems, s$ncat, s$nless, s$Maxnphi,
           s$pq.mat, s$starting.sv, s$LambdaNames, s$PhiNames, s$ItemNames,
-          s$LambdaName)
+          s$LambdaName, s$ntraits)
 
 }

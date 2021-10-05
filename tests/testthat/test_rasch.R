@@ -22,8 +22,8 @@ test_that("output from fitting unidimensional Rasch", {
   expect_equal(nrow(model$ItemByTrait), 9)
 
   expect_is(model, "list")
-  expect_is(model$phi.mnlogit, "mnlogit")
-  expect_is(model$mlpl.phi, "logLik")
+  expect_is(model$phi.mlogit, "mlogit")
+  expect_is(model$mlpl.phi, "numeric")
 
   shows_message("No errors detected in the input")
 
@@ -57,8 +57,8 @@ test_that("output from fitting multi-dimensional Rasch", {
   expect_equal(nrow(model$ItemByTrait), 9)
 
   expect_is(model, "list")
-  expect_is(model$phi.mnlogit, "mnlogit")
-  expect_is(model$mlpl.phi, "logLik")
+  expect_is(model$phi.mlogit, "mlogit")
+  expect_is(model$mlpl.phi, "numeric")
 
   shows_message("No errors detected in the input")
 

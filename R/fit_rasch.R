@@ -23,12 +23,14 @@
 #' @param  PhiNames      Names of association parameters
 #' @param  ItemNames     Names of items
 #' @param  LambdaName    Names of lambdas used in output
+#' @param  Maxnphi       Number of phi parameters
+#' @param  ntraits       Number of traits
 #'
 #' @return estimates 	  An item by parameter matrix of the maximum of the log likelihood,
 #'                        estimated item parameters (i.e., Lambdas), and the values of
 #'                        the fixed category scores.
 #' @return fstack	    	Formula for stacked regression
-#' @return phi.mnlogit	Results from mnlogit for stacked regression
+#' @return phi.mlogit	Results from mlogit for stacked regression
 #' @return estimates    An item x parameter estimate matrix and fixed category scores used
 #' @return Phi.mat      Estimated phi parameters
 #' @return mlpl.phi     Value of maximum of log pseudo-likelihood function from the stacked regression
@@ -46,11 +48,12 @@
 #'
 #'  r <- fit.rasch(s$Master, s$npersons, s$nitems, s$ncat, s$nless, s$Maxnphi,
 #'           s$pq.mat, s$starting.sv, s$LambdaNames, s$PhiNames, s$ItemNames,
-#'           s$LambdaName)
+#'           s$LambdaName, s$ntraits)
 #'
 #' @export
 fit.rasch <- function(Master, npersons, nitems, ncat, nless, Maxnphi, pq.mat,
-                      starting.sv, LambdaNames, PhiNames, ItemNames, LambdaName) {
+                      starting.sv, LambdaNames, PhiNames, ItemNames, LambdaName,
+					  ntraits) {
 
   # category scores
   NewNu.block <- matrix(t(starting.sv), nrow=nitems*ncat, ncol=1)
@@ -96,38 +99,45 @@ fit.rasch <- function(Master, npersons, nitems, ncat, nless, Maxnphi, pq.mat,
   # --- formula for stacked regression, coefficients are lambdas and phis
   xstack.names <- c(LambdaNames,PhiNames)
   fstack <- stats::as.formula(paste("y ~",
-                                    paste(xstack.names,collapse="+"),"| 0 | 0",sep=" "))
+                              paste(xstack.names,collapse="+"),"| 0 | 0",sep=" "))
 
   # Fit model
   #--- fit the model
-  phi.mnlogit <- mnlogit::mnlogit(fstack, stack.data, choiceVar="Category")
+   master.mlogit <- dfidx::dfidx(stack.data, choice="y", idx=c("CaseID","alt"))
 
-  #---- Prepare output
+   phi.mlogit <- mlogit::mlogit(fstack, master.mlogit)
 
-  # --- table of lambdas
-  parms <-  phi.mnlogit$coefficients
-  estimates <- matrix(NA,nitems,nless)
-  x <- matrix(NA,nrow=1,ncol=ncat)
-  i <- 1
-  for (item in 1:nitems) {
-    for (cat in 1:nless) {
-      estimates[item,cat] <- parms[i]
-      x[cat] <- paste("x", cat, sep="")
-      i <- i +1
-    }
-  }
-  x[ncat] <- paste("x", ncat, sep="")
+   # --- save some things
+    estimates <- matrix(phi.mlogit$coefficients[1:(nitems*nless)],
+	                 nrow=nitems,
+					 ncol=nless,
+					 byrow=TRUE)
 
-  estimates <- cbind(-rowSums(estimates), estimates, starting.sv)
-  rownames(estimates) <- ItemNames
-  colnames(estimates) <- c("lam1", LambdaName, x)
+   # --- names for fixed scores
+    x <- matrix(NA,nrow=1,ncol=ncat)
+    for (cat in 1:ncat) {
+       x[cat] <- paste("x", cat, sep="")
+      }
+
+    x[ncat] <- paste("x", ncat, sep="")
+
+    estimates <- cbind(-rowSums(estimates), estimates, starting.sv)
+    rownames(estimates) <- ItemNames
+    colnames(estimates) <- c("lam1", LambdaName, x)
+
 
   #--- matrix of phi parameters
-  phi.est <- phi.mnlogit$coefficients[(nitems*nless+1):(nitems*nless+Maxnphi)]
-  Phi.mat <- phi.est
+  phi.est <- phi.mlogit$coefficients[(nitems*nless+1):(nitems*nless+Maxnphi)]
+  if (ntraits >1) {
+    Phi.mat <- matrix(0, nrow = ntraits, ncol = ntraits)
+    Phi.mat[lower.tri(Phi.mat, diag = TRUE)] <- phi.est
+    Phi.mat <- t(Phi.mat)+Phi.mat - diag(diag(t(Phi.mat)))
+} else {
+    Phi.mat <- phi.est
+}
 
-  # --- maximum of pseudo-likelihood function
-  mlpl.phi <- phi.mnlogit$logLik
+  # --- maximum of log pseudo-likelihood function
+  mlpl.phi <- as.numeric(phi.mlogit$logLik)
 
   # --- Information criteria for pseudo-likelihood
   nparm <- nless*nitems +  Maxnphi
@@ -136,7 +146,7 @@ fit.rasch <- function(Master, npersons, nitems, ncat, nless, Maxnphi, pq.mat,
 
   results <- list(estimates=estimates,
                   fstack = fstack,
-                  phi.mnlogit = phi.mnlogit,
+                  phi.mlogit = phi.mlogit,
                   mlpl.phi= mlpl.phi,
                   estimates = estimates,
                   Phi.mat = Phi.mat,

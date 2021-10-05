@@ -70,7 +70,7 @@ pq.mat         An array used to computed (weighted) rest-scores
 
 Phi.mat        A number of traits x number of traits Phi matrix (defual: the identity matrix)
 
-Master         Master data set formated for input to to mnlogit
+Master         Master data set formated for input to to mlogit
 
 tol            Tolerence for deteriming convergence
 }

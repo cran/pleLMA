@@ -72,9 +72,9 @@ estimates      Item x Parameter matrix where 1st column is max LogLike for each 
 
 Phi.mat        Estimated conditional correlation matrix
 
-item.mnlogit   Output from final mnlogit fit to items
+item.mlogit   Output from final mlogit fit to items
 
-phi.mnlogit    Output form final mnlogit fit to stacked data
+phi.mlogit    Output form final mlogit fit to stacked data
 
 mlpl.item      Max Log(pseudo-likelihood) function from item models (i.e. sum of first column of estimates)
 
@@ -174,6 +174,9 @@ n1b <- ple.lma(inData, model.type="nominal", inItemTraitAdj,
   data(vocab)
   inItemTraitAdj <- matrix(1, nrow=10, ncol=1)
   inTraitAdj <- matrix(1, nrow=1, ncol=1)
+
+#--- rasch irt
+  rasch <- ple.lma(inData=vocab, model.type="rasch", inItemTraitAdj, inTraitAdj, tol=1e-03)
 
 #--- 2 pl as a gpcm model
   g.2pl <- ple.lma(inData=vocab, model.type="gpcm", inItemTraitAdj, inTraitAdj, tol=1e-03)

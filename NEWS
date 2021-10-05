@@ -1,0 +1,15 @@
+Package: pleLMA
+Type: Package
+Title: Pseudo-Likelihood Estimation of Log-Multiplicative Association Models
+Version: 0.2.1
+Author: Carolyn J. Anderson
+Maintainer: Carolyn J. Anderson <cja@illinois.edu>
+
+
+Up Dates and News for pleLMA Package
+
+
+9/30/2021   Version 0.2.1
+
+The original pleLMA package depended on the mnlogit package, which has been archived.  The newer version of pleLMA depends on the mlogit and dfidx packages. The new version has all the same functionalities as the original package.
+

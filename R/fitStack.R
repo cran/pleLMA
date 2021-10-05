@@ -8,7 +8,7 @@
 #' be run outside of 'fit.nominal' or 'ple.lma'.
 #'
 #' @param Master	    Master data set from which stacked data is created
-#' @param	item.log  	Last row contains current scale values (item.history)
+#' @param item.log  	Last row contains current scale values (item.history)
 #' @param	phi.log		  Last row contains current estimates of phi
 #' @param fstack		  Formula for stacked regression
 #' @param TraitByTrait inTraitAdj matrix
@@ -85,24 +85,22 @@ FitStack <- function(Master, item.log, phi.log, fstack, TraitByTrait, pq.mat,
                          PhiNames, "alt", "choice")
 
   # ---Fit stacked data
-  model.fit <- mnlogit::mnlogit(fstack, stack.data, choiceVar="Category")
+  stacked <- dfidx::dfidx(stack.data, choice="y", idx=c("CaseID","alt"))
+  model.fit <- mlogit::mlogit(fstack, stacked)
 
   # --- Prepare output
-  parms <- model.fit$coefficients
-  logLike <- model.fit$logLik
+  parms <- model.fit$coefficients[1:(nitems*nless + Maxnphi)]
+  logLike <- as.numeric(model.fit$logLik)
   phi.log <- rbind(phi.log, c(logLike, parms))
 
-  phis <- parms[(nless*nitems+1):(nless*nitems+Maxnphi)]
-  Phi.mat <- matrix(0, nrow=ntraits, ncol=ntraits)
-  iphi <- 1
-  for (p in 1:ntraits) {
-    for (q in p:ntraits) {
-      if (TraitByTrait[p,q]==1) {
-        Phi.mat[p,q] <- phis[iphi]
-        Phi.mat[q,p] <- Phi.mat[p,q]
-        iphi <- iphi + 1
-      }
-    }
+   #--- matrix of phi parameters
+  phi.est <- parms[(nitems*nless+1):(nitems*nless+Maxnphi)]
+  if (ntraits >1) {
+    Phi.mat <- matrix(0, nrow = ntraits, ncol = ntraits)
+    Phi.mat[lower.tri(Phi.mat, diag = TRUE)] <- phi.est
+    Phi.mat <- t(Phi.mat)+Phi.mat - diag(diag(t(Phi.mat)))
+  } else {
+    Phi.mat <- phi.est
   }
 
   results <- list(Phi.mat=Phi.mat, phi.log=phi.log)

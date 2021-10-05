@@ -17,7 +17,7 @@ fit.independence(Master, LambdaNames, LambdaName, ItemNames)
 estimated Lambda parameters}
 }
 \value{
-phi.mnlogit     Parameters estimates and mlpl = logLike output from mnlogit
+phi.mlogit     Parameters estimates and mlpl = logLike output from mnlogit
 
 fstack          Formual used in stacked regression
 

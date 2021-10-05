@@ -59,15 +59,14 @@ ItemGPCM.data <- function(Master, ItemID, Phi.mat, TraitByTrait, pq.mat, startin
 
 # --- the weights (could be done once but will repeat for now)
    	xij <- matrix(rep(starting.sv[item,], npersons), nrow=ncat*npersons, ncol=1)
-
     alpha <- alpha * xij
 
 # --- Build matrix to input to mnlogit package
-    ItemFit <- cbind(item.data[, c(2,4,5)], effects, alpha)
+    ItemFit <- cbind(item.data[, c(2,4,5)], effects, alpha, item.data$alt, item.data$choice)
 
 # ---data used to fit model to data
     ItemFit <- as.data.frame(ItemFit)
-    names(ItemFit) <- c("CaseID", "Category", "y", LambdaName, "alpha")
+    names(ItemFit) <- c("CaseID", "Category", "y", LambdaName, "alpha","alt","choice")
 
     gpcm.item.data <- list (ItemFit= ItemFit,
                             xij = xij)

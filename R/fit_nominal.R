@@ -36,15 +36,15 @@
 #' @return phi.log		 Iteration history of LogLike, lambdas and phi parameters
 #' @return criterion	 Current value of the convergence statistic
 #' @return estimates 	 Item x parameter matrix: LogLike, lambda and scale values
-#' @return Phi.mat	   Estimated conditional correlation matrix
-#' @return fitem		   Formula for item data
+#' @return Phi.mat	     Estimated conditional correlation matrix
+#' @return fitem		 Formula for item data
 #' @return fstack	     Formula for stacked data
-#' @return item.mnlogit Summaries from final run of mnlogit for item regressions
-#' @return phi.mnlogit	Summary from final run of mnlogit for stacked regression
+#' @return item.mlogit   Summaries from final run of mlogit for item regressions
+#' @return phi.mlogit	 Summary from final run of mlogit for stacked regression
 #' @return mlpl.item	 Max log pseudo-likelihood function from item regressions
-#' @return mlpl.phi    Maximum of log pseudo-likelihood function from stacked regression
-#' @return AIC         Akaike information criterion for pseudo-likelihood (smaller is better)
-#' @return BIC         Bayesian information criterion for pseudo-likelihood (smaller is better)
+#' @return mlpl.phi      Maximum of log pseudo-likelihood function from stacked regression
+#' @return AIC           Akaike information criterion for pseudo-likelihood (smaller is better)
+#' @return BIC           Bayesian information criterion for pseudo-likelihood (smaller is better)
 #'
 #' @examples
 #'  data(dass)
@@ -116,14 +116,14 @@ fit.nominal <- function(Master, Phi.mat, starting.sv, pq.mat, tol,
 	criterion <- 10                                   # Any number greater than tol
 	while (criterion>tol) {
 
-		 ItemLoop.results <- ItemLoop(Master, item.log, Phi.mat=Phi.mat,
+		ItemLoop.results <- ItemLoop(Master, item.log, Phi.mat=Phi.mat,
 			                   PersonByItem=PersonByItem, npersons=npersons,
 			                   nitems=nitems, ntraits=ntraits, ncat=ncat,
 			                   nless=nless, TraitByTrait=TraitByTrait,
-								         pq.mat=pq.mat, LambdaName=LambdaName, NuName=NuName,
-								         fitem=fitem)
-			Master <- ItemLoop.results$Master
-			item.log <- ItemLoop.results$item.log
+							   pq.mat=pq.mat, LambdaName=LambdaName, NuName=NuName,
+							   fitem=fitem)
+		Master <- ItemLoop.results$Master
+		item.log <- ItemLoop.results$item.log
 
 	  	converge <- convergence.stats(item.log=item.log, nitems=nitems, nless=nless,
 		                              LambdaName=LambdaName, NuName=NuName)
@@ -143,10 +143,10 @@ fit.nominal <- function(Master, Phi.mat, starting.sv, pq.mat, tol,
 
 	ItemLoop.results <- ItemLoop(Master, item.log, Phi.mat=Phi.mat,
 	                    PersonByItem=PersonByItem, npersons=npersons,
-			                nitems=nitems, ntraits=ntraits, ncat=ncat,
+			            nitems=nitems, ntraits=ntraits, ncat=ncat,
 	                    nless=nless, TraitByTrait=TraitByTrait,
-								      pq.mat=pq.mat, LambdaName=LambdaName, NuName=NuName,
-								      fitem=fitem)
+						pq.mat=pq.mat, LambdaName=LambdaName, NuName=NuName,
+						fitem=fitem)
 	Master <- ItemLoop.results$Master
 	item.log <- ItemLoop.results$item.log
 
@@ -168,10 +168,10 @@ fit.nominal <- function(Master, Phi.mat, starting.sv, pq.mat, tol,
 			                             PersonByItem=PersonByItem, npersons=npersons,
 			                             nitems=nitems, ntraits=ntraits, ncat=ncat,
 			                             nless=nless, TraitByTrait=TraitByTrait,
-								                   pq.mat=pq.mat, LambdaName=LambdaName,
-								                   NuName=NuName, fitem=fitem)
-		  Master <- ItemLoop.results$Master
-			item.log <- ItemLoop.results$item.log
+								         pq.mat=pq.mat, LambdaName=LambdaName,
+								         NuName=NuName, fitem=fitem)
+		    Master <- ItemLoop.results$Master
+			  item.log <- ItemLoop.results$item.log
 
 	  converge <- convergence.stats(item.log=item.log, nitems=nitems, nless=nless,
 	                                LambdaName=LambdaName, NuName=NuName)
@@ -183,26 +183,26 @@ fit.nominal <- function(Master, Phi.mat, starting.sv, pq.mat, tol,
 			}
 		}
 }
-	# --- one last set of models to save output from mnlogit ---
+	# --- one last set of models to save output from mlogit ---
 
 	desired_length <- nitems
-    item.mnlogit <- vector(mode = "list", length = desired_length)
+    item.mlogit <- vector(mode = "list", length = desired_length)
     for (item in 1:nitems) {
 		DataForItem  <-  ItemData(Master, ItemID=item, Phi.mat=Phi.mat, npersons,
 		                          nitems, ntraits, ncat, nless, TraitByTrait,
 		                          pq.mat, LambdaName, NuName)
-		model.fit    <- mnlogit::mnlogit(fitem, DataForItem, choiceVar="Category")
-		item.mnlogit[[item]] <- summary(model.fit)
+        item.data   <- dfidx::dfidx(DataForItem, choice="y", idx=c("CaseID","alt"))
+        item.mlogit[[item]]    <- mlogit::mlogit(fitem, item.data)
  	}
 
 	if (ntraits > 1) {
-		stacked.data <- StackData(Master, item.log, phi.log, pq.mat, npersons,
-		                          nitems, ncat, nless, ntraits, Maxnphi, PhiNames,
-		                          LambdaNames)
-		model.fit<- mnlogit::mnlogit(fstack, stacked.data, choiceVar="Category")
-		phi.mnlogit <- summary(model.fit)
+		   stacked.data <- StackData(Master, item.log, phi.log, pq.mat, npersons,
+		                             nitems, ncat, nless, ntraits, Maxnphi,
+		                             PhiNames, LambdaNames)
+        stacked    <-  dfidx::dfidx(stacked.data, choice="y", idx=c("CaseID","alt"))
+        phi.mlogit <- mlogit::mlogit(fstack, stacked)
     } else {
-	    phi.mnlogit <- NULL
+	    phi.mlogit <- NULL
 	}
 
   # --- save LogLike and parmeters to file
@@ -234,10 +234,10 @@ fit.nominal <- function(Master, Phi.mat, starting.sv, pq.mat, tol,
 
 	# --- Max of ple function to items and phi
 	mlpl.item <- sum(estimates[, 1])
-	mlpl.phi  <- phi.mnlogit$logLik
+	mlpl.phi  <- phi.mlogit$logLik
 
 	#--- Information criteria
-  nparm <- 2*nless*nitems + Maxnphi- ntraits
+    nparm <- 2*nless*nitems + Maxnphi- ntraits
 	AIC <- -1*mlpl.item - nparm
 	BIC <- -2*mlpl.item - nparm*log(length(unique(Master$PersonID)))
 
@@ -250,11 +250,11 @@ results <- list(item.log=item.log,
                 Phi.mat=Phi.mat,
                 fitem=fitem,
                 fstack=fstack,
-				        item.mnlogit=item.mnlogit,
-			          phi.mnlogit=phi.mnlogit,
-				        mlpl.item=mlpl.item,
-			          mlpl.phi=mlpl.phi,
-				        AIC = AIC[1],
-				        BIC = BIC[1])
+				item.mlogit=item.mlogit,
+			    phi.mlogit=phi.mlogit,
+				mlpl.item=mlpl.item,
+			    mlpl.phi=mlpl.phi,
+				AIC = AIC[1],
+				BIC = BIC[1])
 return(results)
 }

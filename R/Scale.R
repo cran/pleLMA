@@ -1,4 +1,4 @@
-#' Imposes scaling constraint to identify parameters LMA (nominal) model
+#' Imposes scaling constraint to identify parameters of the LMA (nominal) model
 #'
 #' Scaling is internal to the function 'fit.nominal', which corresponds
 #' the the nominal item response theory model.  It imposes the required

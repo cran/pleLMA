@@ -12,7 +12,7 @@
 #' and whether any item parameters are still changing.
 #'
 #' @param  item.log      Iteration history of items' log likelihoods and parameter estimates
-#' @param  nitems			   Number of items
+#' @param  nitems		 Number of items
 #' @param  nless         Number of unique marginal terms (i.e., lambdas) and
 #'                        unique category scale values(i.e., nus)
 #' @param  LambdaName    Names of lambdas in item regressions
@@ -24,6 +24,7 @@
 #'
 #'
 #' @examples
+#' \donttest{
 #'  # 9 items from dass data for 250 cases
 #'  data(dass)
 #'  inData <- dass[1:250,c("d1", "d2", "d3", "a1","a2","a3","s1","s2","s3")]
@@ -49,8 +50,7 @@
 #'   stress <- matrix(c(0,0,1), nrow=3, ncol=3, byrow=TRUE)
 #'   das <- list(dpress, anxiety, stress)
 #'   inItemTraitAdj <- rbind(das[[1]], das[[2]], das[[3]])
-#'   
-#' \donttest{
+#'
 #' #--- 3 dimensional nominal
 #'   n3 <- ple.lma(inData, model.type="nominal", inItemTraitAdj, inTraitAdj, tol=1e-03)
 #'   s <- set.up(inData, model.type='nominal', inTraitAdj, inItemTraitAdj)

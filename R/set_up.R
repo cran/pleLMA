@@ -37,7 +37,7 @@
 #' @return Nstack         Length of master data set
 #' @return pq.mat         An array used to computed (weighted) rest-scores
 #' @return Phi.mat        A number of traits x number of traits Phi matrix (defual: the identity matrix)
-#' @return Master         Master data set formated for input to to mnlogit
+#' @return Master         Master data set formated for input to to mlogit
 #' @return tol            Tolerence for deteriming convergence
 #'
 #' @examples
@@ -303,10 +303,12 @@ if (model.type == "independence") {
 
 }
 
-# --- these are specifically needed for mnlogit--- may not need
+# --- these are specifically needed for mlogit--- may not need
 Master$alt <- paste("cat",CatIndex,sep="")
 Master$choice <-   with(Master,y == 1)
 row.names(Master) <- paste(Master$CaseID,":",Master$alt,sep="")
+
+
 
 if (model.type=="independence") {
 results <- list(PersonByItem=PersonByItem,

@@ -50,8 +50,8 @@
 #' @return phi.log        Assocation parameter iteration history
 #' @return estimates      Item x Parameter matrix where 1st column is max LogLike for each item and remaining columns are item parameter estimate
 #' @return Phi.mat        Estimated conditional correlation matrix
-#' @return item.mnlogit   Output from final mnlogit fit to items
-#' @return phi.mnlogit    Output form final mnlogit fit to stacked data
+#' @return item.mlogit   Output from final mlogit fit to items
+#' @return phi.mlogit    Output form final mlogit fit to stacked data
 #' @return mlpl.item      Max Log(pseudo-likelihood) function from item models (i.e. sum of first column of estimates)
 #' @return mlpl.phi       Max Log(pseudo-likelihood) function from stacked regression(s).
 #' @return AIC            Akaike information criterion for pseudo-likelihood (smaller is better)
@@ -126,6 +126,9 @@
 #'   inItemTraitAdj <- matrix(1, nrow=10, ncol=1)
 #'   inTraitAdj <- matrix(1, nrow=1, ncol=1)
 #'
+#' #--- rasch irt
+#'   rasch <- ple.lma(inData=vocab, model.type="rasch", inItemTraitAdj, inTraitAdj, tol=1e-03)
+#'
 #' #--- 2 pl as a gpcm model
 #'   g.2pl <- ple.lma(inData=vocab, model.type="gpcm", inItemTraitAdj, inTraitAdj, tol=1e-03)
 #'
@@ -191,16 +194,16 @@ if (model.type == "nominal") {
 
 } else if (model.type== "gpcm") {
 
-	    model.results <- fit.gpcm(Master, Phi.mat, PersonByItem, TraitByTrait,
-	                              item.by.trait, tol, npersons, nitems, ncat,
-	                              nless, ntraits, Maxnphi, pq.mat, starting.sv,
-	                              ItemNames, LambdaName, LambdaNames, PhiNames)
+	    model.results <- fit.gpcm(Master, Phi.mat, PersonByItem, TraitByTrait, 
+		                 item.by.trait, tol, npersons, nitems, ncat, nless, 
+						 ntraits, Maxnphi, pq.mat, starting.sv, ItemNames,  
+						 LambdaName, LambdaNames, PhiNames)
 
 } else if (model.type=="rasch") {
 
-	      model.results  <- fit.rasch(Master, npersons, nitems, ncat, nless,
-	                                  Maxnphi, pq.mat,	starting.sv, LambdaNames,
-	                                  PhiNames, ItemNames, LambdaName)
+	      model.results  <- fit.rasch(Master, npersons, nitems, ncat, nless, 
+		                              Maxnphi, pq.mat, starting.sv, LambdaNames, 
+									  PhiNames, ItemNames, LambdaName, ntraits)
 
  } else  if (model.type == "independence") {
       model.results <- fit.independence(Master, LambdaNames, LambdaName,
@@ -208,32 +211,32 @@ if (model.type == "nominal") {
  }
 
 all.results <- list(model.type   = model.type,
-              TraitByTrait = TraitByTrait,
+                    TraitByTrait = TraitByTrait,
 			        ItemByTrait  = ItemByTrait,
 			        item.by.trait= item.by.trait,
-	            ItemNames    = ItemNames,
+	                ItemNames    = ItemNames,
 			        PhiNames     = PhiNames,
-		          formula.item = model.results$fitem,
-	            formula.phi  = model.results$fstack,
-              npersons     = npersons,
-	            nitems       = nitems,
-		          ncat         = ncat,
-					    nless        = nless,
-					    Maxnphi      = Maxnphi,
-	            ntraits      = ntraits,
-		          starting.sv  = starting.sv,
-		          tol          = tol,
-		          criterion    = model.results$criterion,
-		          item.log     = model.results$item.log,
-	            phi.log      = model.results$phi.log,
-		          estimates    = model.results$estimates,
-		          Phi.mat      = model.results$Phi.mat,
-		          item.mnlogit = model.results$item.mnlogit,
-		          phi.mnlogit  = model.results$phi.mnlogit,
-	            mlpl.item    = model.results$mlpl.item,
-	            mlpl.phi     = model.results$mlpl.phi,
-					    AIC          = model.results$AIC,
-					    BIC          = model.results$BIC)
+		            formula.item = model.results$fitem,
+	                formula.phi  = model.results$fstack,
+                    npersons     = npersons,
+	                nitems       = nitems,
+		            ncat         = ncat,
+					nless        = nless,
+					Maxnphi      = Maxnphi,
+	                ntraits      = ntraits,
+		            starting.sv  = starting.sv,
+		            tol          = tol,
+		            criterion    = model.results$criterion,
+		            item.log     = model.results$item.log,
+	                phi.log      = model.results$phi.log,
+		            estimates    = model.results$estimates,
+		            Phi.mat      = model.results$Phi.mat,
+		            item.mlogit  = model.results$item.mlogit,
+		            phi.mlogit   = model.results$phi.mlogit,
+	                mlpl.item    = model.results$mlpl.item,
+	                mlpl.phi     = model.results$mlpl.phi,
+					AIC          = model.results$AIC,
+					BIC          = model.results$BIC)
 
 return(all.results)
 }

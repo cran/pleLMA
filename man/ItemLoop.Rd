@@ -61,7 +61,7 @@ item.log  Iteration history of item parameters where the last
 \description{
 This is a core function of the pseudo-likelihood algorithm for items of
 the nominal model. The function calls function 'ItemData' to create
-the data frame for input into 'mnlogit', which is use to fit a conditional
+the data frame for input into 'mlogit', which is use to fit a conditional
 multinomial model (i.e., a discrete choice model) for each item.  The
 up-dated scale are put into the Master data frame and added to the
 item.log array.  Generally the function would not run outside of

@@ -3,7 +3,7 @@
 #' This function is internal to the function 'fit.gpcm' and performs the item
 #' regressions. It is a core function of the pseudo-likelihood algorithm for
 #' items of the GPCM. The function calls function 'itemGPCM.data' to create
-#' the data for input into 'mnlogit', which is use to fit a conditional
+#' the data for input into 'mlogit', which is use to fit a conditional
 #' multinomial model for each item.  The up-dated scale values are put into
 #' the Master data frame and the 'item.log' array.  It generally would not
 #' run outside of 'fit.gpcm' or 'ple.lma'.
@@ -31,25 +31,25 @@
 #'                        alpha parameters
 #'
 #' @export
-
 item.gpcm <- function(Master, item.log, Phi.mat, fitem, TraitByTrait,
                       PersonByItem,  npersons, nitems, ncat, nless,
                       ntraits, Maxnphi, pq.mat,
                       starting.sv, LambdaName) {
 
  for (item in 1:nitems) {
-   DataForItem  <-  ItemGPCM.data(Master, ItemID=item, Phi.mat, TraitByTrait,
+    DataForItem  <-  ItemGPCM.data(Master, ItemID=item, Phi.mat, TraitByTrait,
                                   pq.mat, starting.sv, npersons, nitems, ncat,
                                   nless,  ntraits, LambdaName)
 
-   data.fit <- DataForItem$ItemFit
-   xij      <- DataForItem$xij
-   model.fit <- mnlogit::mnlogit(fitem, data.fit, choiceVar="Category")
+    data.fit  <- DataForItem$ItemFit
+    xij       <- DataForItem$xij
+    gpcmitem  <-  dfidx::dfidx(data.fit, choice="y", idx=c("CaseID","alt"))
+    model.fit <- mlogit::mlogit(fitem, gpcmitem)
 
 # --- Save output
-   parms <- model.fit$coefficients
-   logLike <- model.fit$logLik
-   item.log[[item]] <- rbind(item.log[[item]],c(item,logLike,parms))
+    parms <- model.fit$coefficients[1:(nless+1)]    
+    logLike <- as.numeric(model.fit$logLik)
+    item.log[[item]] <- rbind(item.log[[item]],c(item,logLike,parms))
 
 # --- Faster than my first method
    a <- parms[length(parms)]
